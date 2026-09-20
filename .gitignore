@@ -30,3 +30,7 @@ desktop.ini
 
 # Local drafts and release prep (not for git)
 docs/_local/
+
+# Local test-server credentials (personal access token + test channel id)
+.mm-token
+.mm-channel

@@ -7,6 +7,18 @@ function getThreadLabel(locale: string): string {
     return locale.toLowerCase().startsWith('ru') ? 'Тред' : 'Thread';
 }
 
+export function getQuoteLabel(locale: string): string {
+    return locale.toLowerCase().startsWith('ru') ? 'Цитировать' : 'Quote';
+}
+
+export function getReplyActionLabel(locale: string): string {
+    return locale.toLowerCase().startsWith('ru') ? 'Ответить' : 'Reply';
+}
+
+export function getReplyActionTitle(locale: string): string {
+    return locale.toLowerCase().startsWith('ru') ? 'Ответить на сообщение' : 'Reply to message';
+}
+
 export function getTranslationsForLocale(locale: string): Record<string, string> {
     const threadLabel = getThreadLabel(locale);
 

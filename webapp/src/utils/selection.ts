@@ -4,9 +4,11 @@
 import {MAX_QUOTED_FRAGMENT_LENGTH} from '../constants';
 
 const POST_ID_PATTERNS = [
-    /^post_([a-z0-9]+)$/i,
-    /^rhsPost_([a-z0-9]+)$/i,
-    /^postView_([a-z0-9]+)$/i,
+    /^post_([a-z0-9]{26})$/i,
+    /^rhsPost_([a-z0-9]{26})$/i,
+    /^searchResult_([a-z0-9]{26})$/i,
+    /^postView_([a-z0-9]{26})$/i,
+    /^rhsPostView_([a-z0-9]{26})$/i,
     /^post-message-([a-z0-9]+)$/i,
     /^([a-z0-9]{26})$/i,
 ];
@@ -14,6 +16,7 @@ const POST_ID_PATTERNS = [
 // Selectors that identify the rendered body of a message, so the selection
 // popup ignores author names, timestamps and other non-message UI text.
 const MESSAGE_BODY_SELECTORS = [
+    '[data-testid="post-message-text"]',
     '[data-testid^="postMessageText"]',
     '.post-message__text',
     '.post-message__content',
@@ -28,15 +31,22 @@ function matchPostId(value?: string | null): string | null {
 
     for (const pattern of POST_ID_PATTERNS) {
         const match = value.match(pattern);
-        if (match?.[1]) {
+        if (match?.[1] && isPostIdLike(match[1])) {
             return match[1];
         }
-        if (match?.[0] && match[0].length === 26) {
+        if (match?.[0] && isPostIdLike(match[0])) {
             return match[0];
         }
     }
 
     return null;
+}
+
+// Mattermost post ids are 26 lowercase alphanumeric characters. Captures that
+// do not look like a post id (e.g. the literal "text" from
+// data-testid="post-message-text") must be rejected.
+function isPostIdLike(value: string): boolean {
+    return /^[a-z0-9]{26}$/i.test(value);
 }
 
 export function extractPostIdFromElement(target: EventTarget | null): string | null {
@@ -46,15 +56,14 @@ export function extractPostIdFromElement(target: EventTarget | null): string | n
 
     let element = target instanceof Element ? target : target.parentElement;
     while (element) {
-        const postId = matchPostId(
-            element.getAttribute('data-postid') ||
-            element.getAttribute('data-post-id') ||
-            element.getAttribute('data-testid') ||
-            element.id,
-        );
-
-        if (postId) {
-            return postId;
+        // Every attribute is matched on its own: in Mattermost 11.x the post
+        // container has both data-testid="postView" (no id inside) and
+        // id="post_<id>", so a non-null data-testid must not shadow the id.
+        for (const attribute of ['data-postid', 'data-post-id', 'data-testid', 'id']) {
+            const postId = matchPostId(element.getAttribute(attribute));
+            if (postId) {
+                return postId;
+            }
         }
 
         element = element.parentElement;

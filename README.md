@@ -1,66 +1,71 @@
 # Best Reply — Mattermost Plugin
 
-Reply to a specific message **in the channel stream** or **in a thread** with a visible quote block — and quote **only the selected fragment** of a message when you need it.
+<div align="center">
 
-Best Reply combines two plugins:
+**Reply to a message in the channel stream or in a thread — with a visible quote block. Select a fragment to quote only that part.**
 
-- the reply UX of [Azario16/mattermost-plugin-channel-reply](https://github.com/Azario16/mattermost-plugin-channel-reply) (Channel Reply) — Reply button, composer preview, clickable quote blocks, channel/thread contexts;
-- the fragment quoting of [ZILosoft/mattermost-reply](https://github.com/ZILosoft/mattermost-reply) (Zilosoft Quote Reply) — select part of a message and quote just that fragment, with a Ctrl+Q hotkey.
+![Reply in channel with a quote block](docs/images/reply-in-channel.png)
 
-## Features
+</div>
 
-- **Reply in channel** — reply to a root message from the main channel composer; the answer appears as a separate channel message with a quoted reference (does not open the thread sidebar).
-- **Reply in thread** — reply from the thread sidebar or via **Thread** in the post menu; the answer stays in the thread.
-- **Quote a fragment** — select part of a message and a small **Quote** popup appears above the selection (or press **Ctrl+Q**). The reply quotes only the selected fragment instead of the whole message.
-- **Clickable quotes** — clicking a quote block navigates to the original message using Mattermost permalinks (scroll + highlight), including inside an open thread.
-- **Quote UI** — quote bar with author and avatar, compact preview above the composer, up to 5 lines of quoted text.
-- **Mobile fallback** — on native mobile clients the quoted reply is readable as a markdown blockquote with the author name and the quoted text (fragment if the reply was created from a selection). Creating quoted replies from the mobile app is not supported.
+Best Reply merges two plugins into one:
 
-Fragments are capped at 500 characters (truncated with an ellipsis).
+- the reply UX of [Azario16/mattermost-plugin-channel-reply](https://github.com/Azario16/mattermost-plugin-channel-reply) (MIT) — Reply button, composer preview, clickable quote blocks, channel/thread contexts;
+- the fragment quoting of [ZILosoft/mattermost-reply](https://github.com/ZILosoft/mattermost-reply) (Apache-2.0) — select part of a message and quote just that fragment, with a Ctrl+Q hotkey.
+
+## Key Features
+
+- **Reply in channel** — answer a message right in the channel stream; the reply is posted as a separate channel message with a quote block on top (the thread sidebar does not open).
+- **Reply in thread** — answer from the thread sidebar (or via **Thread** in the post menu); the reply stays in the thread.
+- **Quote a fragment** — select part of a message and a small **Quote** popup appears above the selection (or press **Ctrl+Q**); the reply quotes only the selected text instead of the whole message.
+- **Clickable quotes** — clicking a quote block jumps to the original message (permalink scroll + highlight), including inside an already open thread.
+- **Quote preview** — a compact bar with the author, avatar and up to 5 quoted lines appears above the composer before you send; close it with × to cancel the reply.
+- **Localized UI** — Reply/Quote labels follow the user's Mattermost language (English / русский).
+- **Mobile fallback** — on clients without the plugin the reply is readable as a plain markdown quote (`> **Author** > quoted text`), including the fragment for selection-based replies.
+
+Fragments are capped at 500 characters (truncated with an ellipsis). Whole-message quotes are not capped.
 
 ## How it works
 
-The plugin is webapp-only (no server component). A pending reply is stored in
-the plugin's Redux state and attached to the next matching post via the
-`messageWillBePosted` hook. When the reply is sent:
+The plugin is **webapp-only** (no server component, no settings, no tokens).
+A pending reply is stored in the plugin's Redux slice and attached to the
+next matching post by the `messageWillBePosted` hook:
 
-- the post gets a custom type rendered as a rich quote block in the web/desktop client;
-- the selected fragment is stored in the post props and used for both the rendered quote and the mobile markdown fallback;
-- if the quoted post is missing (e.g. after a reload), the fragment is still rendered from the stored props.
+| File | Responsibility |
+|---|---|
+| `webapp/src/index.tsx` | Plugin entry: registry calls and the message hook |
+| `webapp/src/actions/reply.ts` | Starts a pending reply (channel/thread), focuses the composer |
+| `webapp/src/actions/openThread.ts` | Opens the RHS thread via internal Redux actions |
+| `webapp/src/actions/navigateToPost.ts` | Permalink navigation and quote highlighting |
+| `webapp/src/components/ReplyButton.tsx` | Reply action on the post hover bar |
+| `webapp/src/components/SelectionQuoteButton.tsx` | Selection popup + Ctrl+Q hotkey |
+| `webapp/src/components/ReplyComposerPreview.tsx` | Quote bar above the composer |
+| `webapp/src/components/QuotedReplyPost.tsx` | Rich rendering of quoted replies |
+| `webapp/src/utils/selection.ts` | Selection → post id + fragment extraction |
+| `webapp/src/utils/mobileQuote.ts` | Post transformation and mobile markdown fallback |
+
+When the reply is sent, the post gets the custom type `custom_best_reply`
+and props (`best_reply_to`, `best_reply_body`, `best_reply_text` for
+fragments); the message body always carries the mobile-safe markdown quote.
+
+The undocumented Mattermost internals this relies on (DOM attributes,
+internal Redux actions, `window.PostUtils`) is documented in
+[docs/api.md](docs/api.md) — read it before hacking on the plugin.
 
 ## Requirements
 
-- Mattermost **9.0+** (tested with 10.5.x)
-- Node.js **18+** and npm (for building the webapp bundle)
-- **Collapsed threads (CRT)** enabled on the Mattermost server
+- Mattermost **9.0+** (tested with 10.5.x and **11.11.0**)
+- **Collapsed Threads (CRT)** enabled (`always_on` recommended)
+- Web or desktop client; creating quoted replies from the mobile app is not
+  supported (reading works everywhere)
 
-## Build
-
-```bash
-make dist
-```
-
-This installs webapp dependencies, builds `webapp/dist/main.js`, and creates:
-
-```
-dist/com.bestreply.plugin-1.0.0.tar.gz
-```
-
-Other commands:
-
-```bash
-make check    # install deps and run TypeScript type-check
-make webapp   # build webapp only
-make clean    # remove dist/ and node_modules/
-```
-
-## Install
+## Installation
 
 ### System Console
 
 1. Open **System Console → Plugins → Plugin Management**
 2. Set **Enable Plugins** and **Enable Uploads** to `true`
-3. Click **Upload**, select the `.tar.gz` bundle from `dist/`
+3. Click **Upload**, select `dist/com.bestreply.plugin-1.0.0.tar.gz`
 4. Enable **Best Reply**
 
 ### mmctl
@@ -70,34 +75,30 @@ mmctl plugin upload dist/com.bestreply.plugin-1.0.0.tar.gz
 mmctl plugin enable com.bestreply.plugin
 ```
 
-After installation, reload the Mattermost web client (hard refresh: **Ctrl+F5**).
+Hard-refresh the web client afterwards (**Ctrl+F5**).
 
-## Server configuration
+## Development
 
-No plugin settings are required. For thread replies to work as intended:
+```bash
+make check   # TypeScript type check
+make test    # vitest unit tests (48 tests)
+make dist    # build the plugin bundle
+```
 
-- **System Console → Environment → Collapsed Threads** → `always_on`
-- **Thread auto-follow** recommended
+Working agreements and the list of Mattermost gotchas that cost us bugs are
+in [AGENTS.md](AGENTS.md).
 
-## Forking
+## Limitations
 
-If you publish your own fork, update the plugin ID in:
-
-- `plugin.json`
-- `webapp/src/manifest.ts`
-- `webapp/src/types/store.ts` (`PLUGIN_STATE_KEY`)
-- `Makefile`
-
-Use a reverse-DNS ID you control, e.g. `com.example.best-reply`.
-
-## Caveats
-
-The plugin relies on Mattermost webapp internals (Redux actions, DOM class
-names) — exact behavior may differ across Mattermost versions and clients.
-Re-test after Mattermost upgrades.
-
-Fragment quoting works on rendered message bodies (regular markdown posts).
-Selecting text inside another quoted reply's custom block is not supported.
+- The plugin builds on Mattermost webapp internals (DOM attributes, Redux
+  action types, `window.PostUtils`). Re-test after every Mattermost upgrade;
+  the verified semantics live in [docs/api.md](docs/api.md).
+- The pending reply is stored in memory: reloading the page or switching
+  away before sending discards it.
+- Fragment quoting works on regular message bodies; selecting text inside an
+  already quoted reply block is not supported.
+- Quote metadata is attached client-side; there is no server-side validation
+  of the quoted-post reference.
 
 ## Credits and licenses
 
@@ -107,19 +108,3 @@ This plugin is a derivative work:
 - Fragment selection and popup: [ZILosoft/mattermost-reply](https://github.com/ZILosoft/mattermost-reply) — Apache License 2.0
 
 See [NOTICE](NOTICE) for details. Licensed under the MIT License — see [LICENSE](LICENSE).
-
-## Project layout
-
-```
-├── plugin.json       # Plugin manifest
-├── Makefile          # Build & bundle
-├── webapp/           # React/TypeScript source
-│   ├── src/
-│   │   ├── actions/    # reply/thread/navigation actions
-│   │   ├── components/ # ReplyButton, SelectionQuoteButton, quotes, preview
-│   │   ├── utils/      # posts, mobile quote fallback, selection helpers
-│   │   └── ...
-│   └── package.json
-├── NOTICE
-└── LICENSE
-```

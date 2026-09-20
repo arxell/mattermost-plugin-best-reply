@@ -1,0 +1,75 @@
+# AGENTS.md — working on Best Reply
+
+Guide for humans and AI agents working in this repository. Keep this file in
+English. When you change behavior that is documented here, update the file in
+the same commit.
+
+## Layout
+
+- `webapp/src/index.tsx` — plugin entry: registers every extension point, owns
+  the `messageWillBePosted` hook that converts the next matching post into a
+  quoted reply.
+- `webapp/src/actions/` — reply/thread/navigation flows (all client-side).
+- `webapp/src/components/` — Reply button, selection popup, quote blocks,
+  composer preview, ErrorBoundary.
+- `webapp/src/utils/` — pure helpers (selection, posts, mobile fallback).
+- `docs/api.md` — verified semantics of the Mattermost internals we depend on.
+  Read it before touching DOM selection, Redux dispatches, or the composer.
+
+## Dev loop
+
+```bash
+make check   # install deps + tsc
+make test    # install deps + vitest
+make dist    # build webapp + assemble dist/com.bestreply.plugin-1.0.0.tar.gz
+```
+
+Test against a local server: upload the bundle
+(System Console → Plugin Management, or
+`curl -F plugin=@dist/... -F force=true .../api/v4/plugins` with a sysadmin
+token), then hard-refresh the web client.
+
+## Critical gotchas (learned the hard way)
+
+1. **Post id extraction must check each DOM attribute independently.** The
+   Mattermost 11.x post container has `data-testid="postView"` (no id) and
+   `id="post_<id>"`; a `||` fallback chain lets the testid shadow the id and
+   silently disables selection quoting. See `docs/api.md`.
+2. **Never pass JSX elements to the plugin registry** — component types only,
+   or React error #130 unmounts the whole Mattermost app. Guarded by
+   `index.test.ts`.
+3. **macOS tar writes pax archives that Mattermost's extractor rejects.**
+   The Makefile bundles with `COPYFILE_DISABLE=1 tar --format=ustar`.
+   Do not "simplify" that line.
+4. **The registry `messageWillBePosted` hook owns single-use pending replies.**
+   Any post that does not match the pending reply (wrong channel, wrong
+   thread, channel context but `root_id` set) must pass through untouched,
+   and the pending reply is only cleared on a match — otherwise the next
+   unrelated message eats the quote.
+5. **`data-testid="post-message-text"` looks like `post-message-<id>`.**
+   All post-id pattern captures are validated with `/^[a-z0-9]{26}$/i`.
+6. **Composer focus uses a 250 ms timeout** because the RHS thread panel is
+   not mounted synchronously after `SELECT_POST`. Resist "fixing" the
+   timeout without a replacement mechanism.
+7. **`window.PostUtils` / internal Redux actions (`SELECT_POST`,
+   `UPDATE_RHS_STATE`, `RECEIVED_POSTS_IN_THREAD`) are undocumented.** Wrap
+   new uses in the same defensive style as the existing code and record them
+   in `docs/api.md`.
+8. **Every registered component is wrapped in ErrorBoundary** so a plugin
+   render crash degrades to nothing instead of taking down the channel.
+
+## User decisions that must not be violated
+
+- The plugin stays **webapp-only** (no server component).
+- The native Mattermost Reply action stays renamed to "Thread" / "Тред";
+  the plugin's button is the one labeled "Reply" / "Ответить".
+- Fragments are capped at 500 characters; whole-message quotes are not
+  capped.
+- Mobile clients must always see a readable markdown quote in the message
+  body — never props-only rendering.
+
+## Credits
+
+Base reply UX: Azario16/mattermost-plugin-channel-reply (MIT).
+Fragment selection: ZILosoft/mattermost-reply (Apache-2.0).
+See NOTICE.

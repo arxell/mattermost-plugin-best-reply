@@ -9,10 +9,28 @@ type MattermostState = {
             posts: Record<string, Post>;
         };
         users: {
+            currentUserId?: string;
             profiles: Record<string, UserProfile>;
+        };
+        general?: {
+            config?: {
+                DefaultClientLocale?: string;
+            };
         };
     };
 };
+
+// The locale the user sees the webapp in; falls back to the server default
+// when the current user is not loaded yet.
+export function getCurrentUserLocale(state: unknown): string {
+    const mattermostState = state as MattermostState;
+    const currentUserId = mattermostState.entities?.users?.currentUserId;
+    const currentUser = currentUserId ? mattermostState.entities?.users?.profiles?.[currentUserId] : undefined;
+
+    return currentUser?.locale ||
+        mattermostState.entities?.general?.config?.DefaultClientLocale ||
+        'en';
+}
 
 export function getPostFromState(state: unknown, postId: string): Post | undefined {
     const mattermostState = state as MattermostState;

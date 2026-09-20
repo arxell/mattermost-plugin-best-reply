@@ -3,11 +3,13 @@
 // the Best Reply pending-reply flow.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {useStore} from 'react-redux';
+import {useSelector, useStore} from 'react-redux';
 
 import {ensurePostLoaded} from '../actions/navigateToPost';
 import {isReplyInThreadView, startReplyToPost} from '../actions/reply';
 import {isReplyablePost} from '../actions/openThread';
+import {getQuoteLabel} from '../i18n';
+import {getCurrentUserLocale} from '../utils/posts';
 import {getSelectionQuoteContext, type SelectionQuoteContext} from '../utils/selection';
 
 type OverlayState = SelectionQuoteContext & {
@@ -17,10 +19,6 @@ type OverlayState = SelectionQuoteContext & {
 
 const POPUP_WIDTH = 96;
 const POPUP_OFFSET = 8;
-
-function getQuoteLabel(): string {
-    return navigator.language?.toLowerCase().startsWith('ru') ? 'Цитировать' : 'Quote';
-}
 
 function readSelectionOverlay(): OverlayState | null {
     const context = getSelectionQuoteContext();
@@ -40,6 +38,8 @@ function readSelectionOverlay(): OverlayState | null {
 const SelectionQuoteButton: React.FC = () => {
     const store = useStore();
     const [overlay, setOverlay] = useState<OverlayState | null>(null);
+    const locale = useSelector(getCurrentUserLocale);
+    const quoteLabel = getQuoteLabel(locale);
 
     const submitQuote = useCallback(async (current: OverlayState) => {
         setOverlay(null);
@@ -107,7 +107,7 @@ const SelectionQuoteButton: React.FC = () => {
                 void submitQuote(overlay);
             }}
         >
-            {getQuoteLabel()}
+            {quoteLabel}
         </button>
     );
 };

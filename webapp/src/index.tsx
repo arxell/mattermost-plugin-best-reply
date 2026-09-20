@@ -11,6 +11,7 @@ import ReplyComposerPreview from './components/ReplyComposerPreview';
 import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
 import SelectionQuoteButton from './components/SelectionQuoteButton';
+import ErrorBoundary from './components/ErrorBoundary';
 import {QUOTED_REPLY_POST_TYPE} from './constants';
 import {buildQuotedReplyPost} from './utils/mobileQuote';
 import {getTranslationsForLocale} from './i18n';
@@ -33,15 +34,36 @@ type PluginRegistry = {
     registerTranslations: (getTranslationsForLocale: (locale: string) => Record<string, string>) => void;
 };
 
+// The registry expects component types, not elements (passing JSX here throws
+// React #130 and unmounts the whole app); every component is additionally
+// wrapped so a render crash degrades instead of propagating to Mattermost.
+function wrapWithErrorBoundary<P extends {post: Post}>(Component: React.ComponentType<P>): React.ComponentType<P> {
+    const Wrapped: React.FC<P> = (props) => (
+        <ErrorBoundary>
+            <Component {...props}/>
+        </ErrorBoundary>
+    );
+    return Wrapped;
+}
+
+function wrapRootWithErrorBoundary(Component: React.ComponentType): React.ComponentType {
+    const Wrapped: React.FC = () => (
+        <ErrorBoundary>
+            <Component/>
+        </ErrorBoundary>
+    );
+    return Wrapped;
+}
+
 export default class Plugin {
     public initialize(registry: PluginRegistry, store: Store<GlobalState>): void {
         registry.registerReducer(reducer);
         registry.registerTranslations(getTranslationsForLocale);
         registry.registerRootComponent(QuotedReplyStyles);
-        registry.registerRootComponent(ReplyComposerPreview);
-        registry.registerRootComponent(SelectionQuoteButton);
-        registry.registerPostActionComponent(ReplyButton);
-        registry.registerPostTypeComponent(QUOTED_REPLY_POST_TYPE, QuotedReplyPost);
+        registry.registerRootComponent(wrapRootWithErrorBoundary(ReplyComposerPreview));
+        registry.registerRootComponent(wrapRootWithErrorBoundary(SelectionQuoteButton));
+        registry.registerPostActionComponent(wrapWithErrorBoundary(ReplyButton));
+        registry.registerPostTypeComponent(QUOTED_REPLY_POST_TYPE, wrapWithErrorBoundary(QuotedReplyPost));
 
         registry.registerPostDropdownMenuAction(
             'Thread',
