@@ -1,10 +1,12 @@
-import type {Post} from '@mattermost/types/posts';
 import type {Store} from 'redux';
+
+import type {Post} from '@mattermost/types/posts';
 
 import {getOpenThreadRootId, isThreadRhsOpen} from './navigateToPost';
 import {openThreadForPost} from './openThread';
-import {normalizeQuotedFragment} from '../utils/selection';
+
 import {CLEAR_PENDING_REPLY, PLUGIN_STATE_KEY, SET_PENDING_REPLY, type PendingReply, type ReplyContext} from '../types/store';
+import {normalizeQuotedFragment} from '../utils/selection';
 
 type MattermostState = Parameters<typeof isThreadRhsOpen>[0];
 

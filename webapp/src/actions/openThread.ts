@@ -1,5 +1,6 @@
-import type {Post} from '@mattermost/types/posts';
 import type {Store} from 'redux';
+
+import type {Post} from '@mattermost/types/posts';
 
 type MattermostState = {
     entities: {

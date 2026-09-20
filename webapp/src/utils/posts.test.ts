@@ -1,8 +1,10 @@
 import {describe, expect, it} from 'vitest';
+
 import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
 import {getQuotedReplyBody, getQuotedFragment, getQuotedPostDisplayMessage, isQuotedReplyPost, truncateMessage, getDisplayName} from './posts';
+
 import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP, QUOTED_REPLY_TEXT_PROP} from '../constants';
 
 function makePost(overrides: Partial<Post> = {}): Post {
@@ -76,6 +78,7 @@ describe('getQuotedReplyBody', () => {
             message: '> просто цитата без тела',
             props: {[QUOTED_REPLY_BODY_PROP]: 'запасное тело'},
         });
+
         // No blank-line separator: the whole message is treated as the body.
         expect(getQuotedReplyBody(post)).toBe('> просто цитата без тела');
     });

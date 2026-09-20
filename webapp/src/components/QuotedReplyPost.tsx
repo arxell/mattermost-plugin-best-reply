@@ -4,10 +4,11 @@ import {useSelector, useStore} from 'react-redux';
 import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 
+import ReplyQuote from './ReplyQuote';
+
 import {getPermalinkUrl, navigateToQuotedPost} from '../actions/navigateToPost';
 import {QUOTED_REPLY_PROP} from '../constants';
 import {getPostFromState, getUserFromState, getDisplayName, getQuotedReplyBody, getQuotedFragment} from '../utils/posts';
-import ReplyQuote from './ReplyQuote';
 
 type PostFormatOptions = {
     postId?: string;
@@ -58,7 +59,7 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
             return;
         }
 
-        void navigateToQuotedPost(store, replyToPostId);
+        navigateToQuotedPost(store, replyToPostId);
     }, [replyToPostId, store]);
 
     const replyBody = getQuotedReplyBody(post);

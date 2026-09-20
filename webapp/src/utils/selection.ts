@@ -46,7 +46,7 @@ function matchPostId(value?: string | null): string | null {
 // do not look like a post id (e.g. the literal "text" from
 // data-testid="post-message-text") must be rejected.
 function isPostIdLike(value: string): boolean {
-    return /^[a-z0-9]{26}$/i.test(value);
+    return (/^[a-z0-9]{26}$/i).test(value);
 }
 
 export function extractPostIdFromElement(target: EventTarget | null): string | null {

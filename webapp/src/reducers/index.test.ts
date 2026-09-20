@@ -1,8 +1,9 @@
 import {describe, expect, it} from 'vitest';
 
-import reducer from './index';
 import {CLEAR_PENDING_REPLY, SET_PENDING_REPLY} from '../types/store';
 import type {PendingReply} from '../types/store';
+
+import reducer from './index';
 
 const pendingReply: PendingReply = {
     replyToPostId: '4w9h6fbja78jueyh1hgcqg8z4y',

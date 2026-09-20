@@ -3,8 +3,8 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import type {Post} from '@mattermost/types/posts';
 
-import manifest from './manifest';
 import {QUOTED_REPLY_POST_TYPE} from './constants';
+import manifest from './manifest';
 import {PLUGIN_STATE_KEY} from './types/store';
 import type {PendingReply} from './types/store';
 

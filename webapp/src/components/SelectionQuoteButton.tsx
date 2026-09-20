@@ -6,8 +6,8 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {useStore} from 'react-redux';
 
 import {ensurePostLoaded} from '../actions/navigateToPost';
-import {isReplyInThreadView, startReplyToPost} from '../actions/reply';
 import {isReplyablePost} from '../actions/openThread';
+import {isReplyInThreadView, startReplyToPost} from '../actions/reply';
 import {useTranslation} from '../i18n';
 import {getSelectionQuoteContext, type SelectionQuoteContext} from '../utils/selection';
 
@@ -75,7 +75,7 @@ const SelectionQuoteButton: React.FC = () => {
 
             event.preventDefault();
             event.stopPropagation();
-            void submitQuote(current);
+            submitQuote(current);
         };
 
         document.addEventListener('selectionchange', updateOverlay);
@@ -102,7 +102,7 @@ const SelectionQuoteButton: React.FC = () => {
             style={{top: `${overlay.top}px`, left: `${overlay.left}px`}}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => {
-                void submitQuote(overlay);
+                submitQuote(overlay);
             }}
         >
             {t('quote_action')}

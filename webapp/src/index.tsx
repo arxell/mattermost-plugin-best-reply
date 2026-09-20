@@ -1,22 +1,22 @@
 import React from 'react';
 import type {Store} from 'redux';
 
-import type {GlobalState} from '@mattermost/types/store';
 import type {Post} from '@mattermost/types/posts';
+import type {GlobalState} from '@mattermost/types/store';
 
-import manifest from './manifest';
-import reducer from './reducers';
-import ReplyButton from './components/ReplyButton';
-import ReplyComposerPreview from './components/ReplyComposerPreview';
+import {getPostFromStore, isReplyablePost} from './actions/openThread';
+import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
+import ErrorBoundary from './components/ErrorBoundary';
 import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
+import ReplyButton from './components/ReplyButton';
+import ReplyComposerPreview from './components/ReplyComposerPreview';
 import SelectionQuoteButton from './components/SelectionQuoteButton';
-import ErrorBoundary from './components/ErrorBoundary';
 import {QUOTED_REPLY_POST_TYPE} from './constants';
-import {buildQuotedReplyPost} from './utils/mobileQuote';
 import {getTranslationsForLocale} from './i18n';
-import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
-import {getPostFromStore, isReplyablePost} from './actions/openThread';
+import manifest from './manifest';
+import reducer from './reducers';
+import {buildQuotedReplyPost} from './utils/mobileQuote';
 
 type PluginRegistry = {
     registerReducer: (reducerToRegister: typeof reducer) => void;
@@ -70,7 +70,7 @@ export default class Plugin {
             (postId: string) => {
                 const post = getPostFromStore(store, postId);
                 if (post) {
-                    void startReplyToPost(store, post, {context: 'thread'});
+                    startReplyToPost(store, post, {context: 'thread'});
                 }
             },
             (postId: string) => {

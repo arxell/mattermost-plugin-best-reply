@@ -1,7 +1,9 @@
-import type {Post} from '@mattermost/types/posts';
 import type {Store} from 'redux';
 
+import type {Post} from '@mattermost/types/posts';
+
 import {getPostFromStore} from './openThread';
+
 import {getPostFromState} from '../utils/posts';
 
 const HIGHLIGHT_REPLY = 'HIGHLIGHT_REPLY';

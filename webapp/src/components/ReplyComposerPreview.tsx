@@ -4,10 +4,11 @@ import {useSelector, useStore} from 'react-redux';
 
 import type {GlobalState} from '@mattermost/types/store';
 
+import ReplyQuote from './ReplyQuote';
+
 import {clearPendingReply} from '../actions/reply';
 import {PLUGIN_STATE_KEY, type PendingReply} from '../types/store';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
-import ReplyQuote from './ReplyQuote';
 
 const ReplyComposerPreview: React.FC = () => {
     const store = useStore();
@@ -42,10 +43,8 @@ const ReplyComposerPreview: React.FC = () => {
 
         const mountPreview = () => {
             const mountTarget = (
-                pendingReply.context === 'thread' ?
-                    document.querySelector('.ThreadViewer .AdvancedTextEditor__cell') ||
-                    document.querySelector('.sidebar--right .AdvancedTextEditor__cell') :
-                    document.querySelector('#post-create .AdvancedTextEditor__cell')
+                pendingReply.context === 'thread' ? document.querySelector('.ThreadViewer .AdvancedTextEditor__cell') ||
+                    document.querySelector('.sidebar--right .AdvancedTextEditor__cell') : document.querySelector('#post-create .AdvancedTextEditor__cell')
             ) as HTMLElement | null;
 
             if (!mountTarget) {

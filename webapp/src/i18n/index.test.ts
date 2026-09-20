@@ -1,7 +1,8 @@
 import {describe, expect, it} from 'vitest';
 
+import {messages, type MessageId} from './messages';
+
 import {translate, useTranslation, getTranslationsForLocale} from './index';
-import {messages, type Locale, type MessageId} from './messages';
 
 describe('translate', () => {
     it('returns the localized string for known locales', () => {

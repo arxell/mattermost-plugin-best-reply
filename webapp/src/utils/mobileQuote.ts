@@ -1,9 +1,11 @@
-import type {Post, PostType} from '@mattermost/types/posts';
 import type {Store} from 'redux';
+
+import type {Post, PostType} from '@mattermost/types/posts';
+
+import {getDisplayName, getPostFromState, getUserFromState, getQuotedPostDisplayMessage, truncateMessage} from './posts';
 
 import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP, QUOTED_REPLY_TEXT_PROP} from '../constants';
 import type {PendingReply} from '../types/store';
-import {getDisplayName, getPostFromState, getUserFromState, getQuotedPostDisplayMessage, truncateMessage} from './posts';
 
 export function formatMobileQuoteBlock(authorName: string, quotedMessage: string): string {
     const author = authorName.trim() || 'Unknown user';
@@ -20,12 +22,11 @@ export function buildQuotedReplyPost(post: Post, pendingReply: PendingReply, sto
     const quotedUser = quotedPost ? getUserFromState(state, quotedPost.user_id) : undefined;
     const quotedText = pendingReply.selectedText ||
         (quotedPost ? getQuotedPostDisplayMessage(quotedPost) : '');
-    const mobileQuote = quotedText
-        ? formatMobileQuoteBlock(getDisplayName(quotedUser), quotedText)
-        : '';
+    const mobileQuote = quotedText ? formatMobileQuoteBlock(getDisplayName(quotedUser), quotedText) : '';
 
     return {
         ...post,
+
         // Custom post types are rendered by the plugin; the server-side type
         // union does not model them, hence the cast.
         type: QUOTED_REPLY_POST_TYPE as PostType,

@@ -68,8 +68,17 @@ token), then hard-refresh the web client.
 - Mobile clients must always see a readable markdown quote in the message
   body — never props-only rendering.
 
+## Toolchain decisions
+
+- `@mattermost/eslint-plugin` is pinned to `1.1.0-0` (a prerelease): the
+  registry only publishes `1.0.0` and `1.1.0-0`, and `1.1.0-0` is the version
+  the unified config `plugin:@mattermost/react` is built for. Only
+  `header/header` is turned off; everything else stays as the plugin sets it.
+
 ## Credits
 
 Base reply UX: Azario16/mattermost-plugin-channel-reply (MIT).
+Fragment selection: ZILosoft/mattermost-reply (Apache-2.0).
+See NOTICE.
 Fragment selection: ZILosoft/mattermost-reply (Apache-2.0).
 See NOTICE.
