@@ -10,6 +10,12 @@
 
 ![Reply in channel with a quote block](docs/images/reply-in-channel.png)
 
+*Reply in channel with a full-message quote.*
+
+![Quote a selected fragment](docs/images/quote-fragment.png)
+
+*Select a fragment — the **Quote** popup appears, and the reply quotes only the selected part (composer preview on top).*
+
 </div>
 
 Best Reply merges two plugins into one:
@@ -69,13 +75,13 @@ internal Redux actions, `window.PostUtils`) is documented in
 
 1. Open **System Console → Plugins → Plugin Management**
 2. Set **Enable Plugins** and **Enable Uploads** to `true`
-3. Click **Upload**, select `dist/com.bestreply.plugin-1.0.0.tar.gz`
+3. Click **Upload**, select `dist/com.bestreply.plugin-1.1.0.tar.gz`
 4. Enable **Best Reply**
 
 ### mmctl
 
 ```bash
-mmctl plugin upload dist/com.bestreply.plugin-1.0.0.tar.gz
+mmctl plugin upload dist/com.bestreply.plugin-1.1.0.tar.gz
 mmctl plugin enable com.bestreply.plugin
 ```
 
@@ -85,7 +91,7 @@ Hard-refresh the web client afterwards (**Ctrl+F5**).
 
 ```bash
 make check   # TypeScript type check
-make test    # vitest unit tests (48 tests)
+make test    # vitest unit tests (53 tests)
 make dist    # build the plugin bundle
 ```
 

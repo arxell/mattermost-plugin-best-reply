@@ -21,7 +21,7 @@ the same commit.
 ```bash
 make check   # install deps + tsc
 make test    # install deps + vitest
-make dist    # build webapp + assemble dist/com.bestreply.plugin-1.0.0.tar.gz
+make dist    # build webapp + assemble dist/com.bestreply.plugin-1.1.0.tar.gz
 ```
 
 Test against a local server: upload the bundle
