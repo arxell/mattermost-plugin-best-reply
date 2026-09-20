@@ -1,12 +1,11 @@
 import React from 'react';
-import {useSelector, useStore} from 'react-redux';
+import {useStore} from 'react-redux';
 
 import type {Post} from '@mattermost/types/posts';
 
 import {startReplyToPost, isReplyInThreadView} from '../actions/reply';
 import {isReplyablePost} from '../actions/openThread';
-import {getReplyActionLabel, getReplyActionTitle} from '../i18n';
-import {getCurrentUserLocale} from '../utils/posts';
+import {useTranslation} from '../i18n';
 
 type Props = {
     post: Post;
@@ -29,7 +28,7 @@ const ReplyIcon = () => (
 
 const ReplyButton: React.FC<Props> = ({post}) => {
     const store = useStore();
-    const locale = useSelector(getCurrentUserLocale);
+    const t = useTranslation();
 
     if (!isReplyablePost(post)) {
         return null;
@@ -50,12 +49,12 @@ const ReplyButton: React.FC<Props> = ({post}) => {
         <button
             type='button'
             className='quoted-reply-post-action'
-            aria-label={getReplyActionLabel(locale)}
-            title={getReplyActionTitle(locale)}
+            aria-label={t('reply_action')}
+            title={t('reply_action_title')}
             onClick={handleClick}
         >
             <ReplyIcon/>
-            <span className='quoted-reply-post-action__label'>{getReplyActionLabel(locale)}</span>
+            <span className='quoted-reply-post-action__label'>{t('reply_action')}</span>
         </button>
     );
 };

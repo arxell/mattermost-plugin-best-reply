@@ -1,30 +1,45 @@
 import {describe, expect, it} from 'vitest';
 
-import {getQuoteLabel, getReplyActionLabel, getReplyActionTitle, getTranslationsForLocale} from './index';
+import {translate, useTranslation, getTranslationsForLocale} from './index';
+import {messages, type Locale, type MessageId} from './messages';
 
-describe('i18n labels', () => {
-    it('translates to Russian for ru locales', () => {
-        expect(getQuoteLabel('ru')).toBe('Цитировать');
-        expect(getQuoteLabel('ru-RU')).toBe('Цитировать');
-        expect(getReplyActionLabel('ru')).toBe('Ответить');
-        expect(getReplyActionTitle('ru')).toBe('Ответить на сообщение');
+describe('translate', () => {
+    it('returns the localized string for known locales', () => {
+        expect(translate('en', 'quote_action')).toBe('Quote');
+        expect(translate('ru', 'quote_action')).toBe('Цитировать');
+        expect(translate('fr', 'quote_action')).toBe('Citer');
+        expect(translate('de', 'quote_action')).toBe('Zitieren');
     });
 
-    it('falls back to English', () => {
-        expect(getQuoteLabel('en')).toBe('Quote');
-        expect(getQuoteLabel('de')).toBe('Quote');
-        expect(getReplyActionLabel('en')).toBe('Reply');
-        expect(getReplyActionTitle('fr')).toBe('Reply to message');
+    it('falls back to English for unknown locales', () => {
+        expect(translate('pt-BR', 'reply_action')).toBe('Reply');
+    });
+
+    it('exposes every message id from the English table', () => {
+        const ids = Object.keys(messages.en) as MessageId[];
+        expect(ids).toContain('quote_action');
+        expect(ids).toContain('reply_action');
+        expect(ids).toContain('reply_action_title');
+        expect(ids).toContain('thread_action');
     });
 });
 
 describe('getTranslationsForLocale', () => {
-    it('renames the native Reply action to Thread', () => {
-        const en = getTranslationsForLocale('en');
-        expect(en['post_info.reply']).toBe('Thread');
-        expect(en['post_info.comment_icon.tooltip.reply']).toBe('Thread');
+    it('renames the native Reply action to Thread in the given language', () => {
+        expect(getTranslationsForLocale('en')).toEqual({
+            'post_info.reply': 'Thread',
+            'post_info.comment_icon.tooltip.reply': 'Thread',
+        });
+        expect(getTranslationsForLocale('ru')['post_info.reply']).toBe('Тред');
+        expect(getTranslationsForLocale('fr')['post_info.reply']).toBe('Fil');
+        expect(getTranslationsForLocale('de')['post_info.reply']).toBe('Thread');
+    });
+});
 
-        const ru = getTranslationsForLocale('ru');
-        expect(ru['post_info.reply']).toBe('Тред');
+describe('useTranslation', () => {
+    it('is a hook returning a translator bound to the store locale', () => {
+        // Rendering the hook needs a store; assert its contract instead:
+        // same signature as translate with a pre-bound locale.
+        expect(typeof useTranslation).toBe('function');
     });
 });

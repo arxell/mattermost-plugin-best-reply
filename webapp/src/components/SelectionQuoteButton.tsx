@@ -3,13 +3,12 @@
 // the Best Reply pending-reply flow.
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {useSelector, useStore} from 'react-redux';
+import {useStore} from 'react-redux';
 
 import {ensurePostLoaded} from '../actions/navigateToPost';
 import {isReplyInThreadView, startReplyToPost} from '../actions/reply';
 import {isReplyablePost} from '../actions/openThread';
-import {getQuoteLabel} from '../i18n';
-import {getCurrentUserLocale} from '../utils/posts';
+import {useTranslation} from '../i18n';
 import {getSelectionQuoteContext, type SelectionQuoteContext} from '../utils/selection';
 
 type OverlayState = SelectionQuoteContext & {
@@ -38,8 +37,7 @@ function readSelectionOverlay(): OverlayState | null {
 const SelectionQuoteButton: React.FC = () => {
     const store = useStore();
     const [overlay, setOverlay] = useState<OverlayState | null>(null);
-    const locale = useSelector(getCurrentUserLocale);
-    const quoteLabel = getQuoteLabel(locale);
+    const t = useTranslation();
 
     const submitQuote = useCallback(async (current: OverlayState) => {
         setOverlay(null);
@@ -107,7 +105,7 @@ const SelectionQuoteButton: React.FC = () => {
                 void submitQuote(overlay);
             }}
         >
-            {quoteLabel}
+            {t('quote_action')}
         </button>
     );
 };

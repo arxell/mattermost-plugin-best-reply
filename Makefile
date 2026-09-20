@@ -1,5 +1,5 @@
 PLUGIN_ID := com.bestreply.plugin
-PLUGIN_VERSION := 1.0.0
+PLUGIN_VERSION := 1.1.0
 BUNDLE_NAME := $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
 
 .PHONY: all webapp bundle dist clean check test
