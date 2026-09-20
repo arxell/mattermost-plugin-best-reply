@@ -1,0 +1,29 @@
+Best Reply — a Mattermost webapp plugin
+Copyright 2026 Best Reply contributors
+
+This product is a derivative work of two open-source Mattermost plugins:
+
+1. Azario16/mattermost-plugin-channel-reply ("Channel Reply")
+   https://github.com/Azario16/mattermost-plugin-channel-reply
+   Copyright rakhid. Licensed under the MIT License.
+   Used as the base of this project: reply flow (pending reply in Redux
+   state, messageWillBePosted hook), channel/thread contexts, quote
+   rendering components, composer preview, permalink navigation, mobile
+   markdown fallback. Changed: plugin ID and naming, post type and prop
+   names, build metadata; fragment-quoting support added.
+
+2. ZILosoft/mattermost-reply ("Zilosoft Quote Reply")
+   https://github.com/ZILosoft/mattermost-reply
+   Copyright ZILosoft. Licensed under the Apache License, Version 2.0.
+   Derived portions: DOM post-id extraction and message-body detection
+   (webapp/src/utils/selection.ts) and the selection popup with the Ctrl+Q
+   hotkey (webapp/src/components/SelectionQuoteButton.tsx), adapted from
+   webapp/src/reply_utils.ts and
+   webapp/src/components/selection_reply_button.tsx. Changes: adapted to the
+   pending-reply flow of the base plugin, fragment stored in post props and
+   truncated to 500 characters, removed the loose 26-char substring fallback
+   for post-id detection, popup label localized via navigator.language.
+   Licensed to you under the Apache License, Version 2.0; you may obtain a
+   copy at http://www.apache.org/licenses/LICENSE-2.0
+
+The combined work is distributed under the MIT License (see LICENSE).

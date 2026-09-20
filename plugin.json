@@ -1,0 +1,15 @@
+{
+    "id": "com.bestreply.plugin",
+    "name": "Best Reply",
+    "description": "Reply in channel or thread with a quote block, or quote just a selected fragment of a message. Clickable quotes navigate to the original post.",
+    "version": "1.0.0",
+    "min_server_version": "9.0.0",
+    "webapp": {
+        "bundle_path": "webapp/dist/main.js"
+    },
+    "settings_schema": {
+        "header": "Reply in channel or in thread with a quote block. Select part of a message to quote only that fragment.",
+        "footer": "",
+        "settings": []
+    }
+}
