@@ -9,6 +9,7 @@ yarn-error.log*
 # Build artifacts
 dist/
 webapp/dist/
+webapp/coverage/
 
 # OS
 .DS_Store

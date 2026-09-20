@@ -3,6 +3,8 @@
 <div align="center">
 
 [![CI](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml/badge.svg)](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml)
+[![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-blue)](https://github.com/arxell/mattermost-plugin-best-reply/releases/latest)
+[![coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Farxell%2Fmattermost-plugin-best-reply%2Fcoverage-badge%2Fcoverage-badge.json)](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml)
 
 **Reply to a message in the channel stream or in a thread — with a visible quote block. Select a fragment to quote only that part.**
 

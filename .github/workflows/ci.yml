@@ -1,12 +1,22 @@
 name: ci
-
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    tags:
+      - "v*"
   pull_request:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  webapp:
+  # Webapp-only equivalent of mattermost/actions-workflows plugin-ci: the
+  # official reusable workflow installs Go unconditionally (go.mod), and this
+  # repository is webapp-only, so the same lint/test/build pipeline runs
+  # directly here.
+  plugin-ci:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -29,20 +39,80 @@ jobs:
       - name: Unit tests
         run: npm run test
 
-      - name: Build bundle
+      - name: Build webapp bundle
         run: npm run build
-
-  bundle:
-    runs-on: ubuntu-latest
-    needs: webapp
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Assemble plugin bundle
         run: make bundle
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload plugin bundle
+        uses: actions/upload-artifact@v4
         with:
-          name: com.bestreply.plugin
+          name: dist
           path: dist/*.tar.gz
           if-no-files-found: error
+
+  coverage:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: webapp/.nvmrc
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+
+      - run: npm ci
+        working-directory: webapp
+
+      - run: npx vitest run --coverage
+        working-directory: webapp
+
+      - name: Build badge JSON
+        run: >
+          node -e "const s=require('./webapp/coverage/coverage-summary.json');const pct=s.total.lines.pct;
+          const color=pct>=80?'brightgreen':pct>=60?'yellow':'red';
+          require('fs').writeFileSync('coverage-badge.json',JSON.stringify({schemaVersion:1,label:'coverage',message:pct+'%',color})+'\n');"
+          cat coverage-badge.json
+
+      - name: Publish badge branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B coverage-badge
+          git add coverage-badge.json
+          git commit -m "Update coverage badge [skip ci]" || exit 0
+          # The badge commit is not part of main's history, so the branch
+          # is rewritten on every run.
+          git push --force origin coverage-badge
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [plugin-ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download plugin bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # download-artifact v4 nests a single artifact's files one level
+      # deeper than expected on some runner versions; flatten so the
+      # release step always finds the tarball at the top of dist/.
+      - name: Flatten the bundle directory
+        run: |
+          find dist -mindepth 2 -type f -exec mv -n {} dist/ \;
+          find dist -mindepth 1 -type d -exec rmdir {} + 2>/dev/null || true
+          ls -la dist
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/*.tar.gz --title "$GITHUB_REF_NAME" --generate-notes --repo "$GITHUB_REPOSITORY"
