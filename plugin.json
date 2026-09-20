@@ -2,6 +2,9 @@
     "id": "com.bestreply.plugin",
     "name": "Best Reply",
     "description": "Reply in channel or thread with a quote block, or quote just a selected fragment of a message. Clickable quotes navigate to the original post.",
+    "homepage_url": "https://github.com/arxell/mattermost-plugin-best-reply",
+    "support_url": "https://github.com/arxell/mattermost-plugin-best-reply/issues",
+    "release_notes_url": "https://github.com/arxell/mattermost-plugin-best-reply/releases",
     "version": "1.0.0",
     "min_server_version": "9.0.0",
     "webapp": {

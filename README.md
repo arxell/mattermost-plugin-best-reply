@@ -2,6 +2,8 @@
 
 <div align="center">
 
+[![CI](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml/badge.svg)](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml)
+
 **Reply to a message in the channel stream or in a thread — with a visible quote block. Select a fragment to quote only that part.**
 
 ![Reply in channel with a quote block](docs/images/reply-in-channel.png)
