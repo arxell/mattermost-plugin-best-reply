@@ -32,7 +32,7 @@ jobs:
         working-directory: webapp
 
       - name: Type check
-        run: npm run check
+        run: npm run check-types
         working-directory: webapp
 
       - name: Unit tests

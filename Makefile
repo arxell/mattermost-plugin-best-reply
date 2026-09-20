@@ -23,7 +23,7 @@ dist: webapp bundle
 
 check:
 	cd webapp && npm install
-	cd webapp && npm run check
+	cd webapp && npm run check-types
 
 test:
 	cd webapp && npm install

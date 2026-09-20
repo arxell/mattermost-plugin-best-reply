@@ -1,12 +1,19 @@
 {
     "name": "mattermost-plugin-best-reply",
     "private": true,
+    "engines": {
+        "node": ">=20"
+    },
     "scripts": {
         "build": "webpack --mode=production",
         "debug": "webpack --mode=development",
-        "check": "tsc",
+        "build:watch": "webpack --mode=development --watch",
+        "lint": "eslint --ext .ts,.tsx src",
+        "fix": "eslint --ext .ts,.tsx src --fix",
+        "check-types": "tsc --noEmit",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage"
     },
     "devDependencies": {
         "@babel/core": "7.25.2",
