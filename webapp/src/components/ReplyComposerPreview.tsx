@@ -13,8 +13,11 @@ import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts
 const ReplyComposerPreview: React.FC = () => {
     const store = useStore();
     const pendingReply = useSelector((state: GlobalState) => {
-        const pluginState = (state as unknown as Record<string, {pendingReply: unknown}>)[PLUGIN_STATE_KEY];
-        return pluginState?.pendingReply as PendingReply | null;
+        // The plugin slice is mounted under `plugins-<plugin-id>` by
+        // registerReducer and is not part of GlobalState
+        // (docs/api.md#internal-redux-actions).
+        const pluginState = (state as unknown as Record<string, {pendingReply: PendingReply | null} | undefined>)[PLUGIN_STATE_KEY];
+        return pluginState?.pendingReply ?? null;
     });
 
     const replyPost = useSelector((state: GlobalState) => {

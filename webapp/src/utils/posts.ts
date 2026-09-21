@@ -1,45 +1,26 @@
 import type {Post} from '@mattermost/types/posts';
+import type {GlobalState} from '@mattermost/types/store';
 import type {UserProfile} from '@mattermost/types/users';
 
 import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP, QUOTED_REPLY_TEXT_PROP} from '../constants';
 
-type MattermostState = {
-    entities: {
-        posts: {
-            posts: Record<string, Post>;
-        };
-        users: {
-            currentUserId?: string;
-            profiles: Record<string, UserProfile>;
-        };
-        general?: {
-            config?: {
-                DefaultClientLocale?: string;
-            };
-        };
-    };
-};
-
 // The locale the user sees the webapp in; falls back to the server default
 // when the current user is not loaded yet.
-export function getCurrentUserLocale(state: unknown): string {
-    const mattermostState = state as MattermostState;
-    const currentUserId = mattermostState.entities?.users?.currentUserId;
-    const currentUser = currentUserId ? mattermostState.entities?.users?.profiles?.[currentUserId] : undefined;
+export function getCurrentUserLocale(state: GlobalState): string {
+    const currentUserId = state.entities.users.currentUserId;
+    const currentUser = currentUserId ? state.entities.users.profiles[currentUserId] : undefined;
 
     return currentUser?.locale ||
-        mattermostState.entities?.general?.config?.DefaultClientLocale ||
+        state.entities.general.config.DefaultClientLocale ||
         'en';
 }
 
-export function getPostFromState(state: unknown, postId: string): Post | undefined {
-    const mattermostState = state as MattermostState;
-    return mattermostState.entities?.posts?.posts?.[postId];
+export function getPostFromState(state: GlobalState, postId: string): Post | undefined {
+    return state.entities.posts.posts[postId];
 }
 
-export function getUserFromState(state: unknown, userId: string): UserProfile | undefined {
-    const mattermostState = state as MattermostState;
-    return mattermostState.entities?.users?.profiles?.[userId];
+export function getUserFromState(state: GlobalState, userId: string): UserProfile | undefined {
+    return state.entities.users.profiles[userId];
 }
 
 export function getDisplayName(user?: UserProfile): string {

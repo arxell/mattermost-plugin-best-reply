@@ -1,19 +1,7 @@
 import type {Store} from 'redux';
 
 import type {Post} from '@mattermost/types/posts';
-
-type MattermostState = {
-    entities: {
-        general: {
-            config: {
-                SiteURL: string;
-            };
-        };
-        posts: {
-            posts: Record<string, Post>;
-        };
-    };
-};
+import type {GlobalState} from '@mattermost/types/store';
 
 type PostList = {
     order: string[];
@@ -25,12 +13,12 @@ const RECEIVED_POSTS = 'RECEIVED_POSTS';
 const RECEIVED_POSTS_IN_THREAD = 'RECEIVED_POSTS_IN_THREAD';
 
 function getSiteUrl(store: Store): string {
-    const state = store.getState() as MattermostState;
+    const state: GlobalState = store.getState();
     return state.entities.general.config.SiteURL || window.location.origin;
 }
 
 export function getPostFromStore(store: Store, postId: string): Post | undefined {
-    const state = store.getState() as MattermostState;
+    const state: GlobalState = store.getState();
     return state.entities.posts.posts[postId];
 }
 
