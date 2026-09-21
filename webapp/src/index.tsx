@@ -16,23 +16,8 @@ import {QUOTED_REPLY_POST_TYPE} from './constants';
 import {getTranslationsForLocale} from './i18n';
 import manifest from './manifest';
 import reducer from './reducers';
+import type {PluginRegistry} from './types/mattermost-webapp';
 import {buildQuotedReplyPost} from './utils/mobileQuote';
-
-type PluginRegistry = {
-    registerReducer: (reducerToRegister: typeof reducer) => void;
-    registerPostActionComponent: (component: React.ComponentType<{post: Post}>) => string;
-    registerPostDropdownMenuAction: (
-        text: React.ReactNode,
-        action: (postId: string) => void,
-        filter?: (postId: string) => boolean,
-    ) => string;
-    registerRootComponent: (component: React.ComponentType) => string;
-    registerPostTypeComponent: (type: string, component: React.ComponentType<{post: Post}>) => string;
-    registerMessageWillBePostedHook: (
-        hook: (post: Post) => {post: Post} | {error: {message: string}} | Promise<{post: Post} | {error: {message: string}}>,
-    ) => string;
-    registerTranslations: (getTranslationsForLocale: (locale: string) => Record<string, string>) => void;
-};
 
 // The registry expects component types, not elements (passing JSX here throws
 // React #130 and unmounts the whole app); every component is additionally
