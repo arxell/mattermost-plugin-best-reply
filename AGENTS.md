@@ -85,10 +85,21 @@ token), then hard-refresh the web client.
   do not edit or commit it. `plugin.json.version` stays the
   release-declared version and must match the `v*` tag at release time.
 
+## Code conventions
+
+- `PluginRegistry` typings live in `webapp/src/types/mattermost-webapp/
+  index.d.ts` (trimmed to the methods this plugin uses) — import the type
+  from there, do not redeclare it in `index.tsx`.
+- Redux state reads use `GlobalState` from `@mattermost/types`. The only
+  remaining casts are the webapp-internal `views.rhs` slice
+  (local `GlobalState` extension in `navigateToPost.ts`) and the plugin
+  state slice under `plugins-<plugin-id>`; both carry a comment pointing to
+  `docs/api.md`. Keep it that way — no new umbrella casts.
+- Magic numbers (timeouts, page sizes, popup geometry) are named constants
+  in `webapp/src/constants.ts` with a one-line "why".
+
 ## Credits
 
 Base reply UX: Azario16/mattermost-plugin-channel-reply (MIT).
-Fragment selection: ZILosoft/mattermost-reply (Apache-2.0).
-See NOTICE.
 Fragment selection: ZILosoft/mattermost-reply (Apache-2.0).
 See NOTICE.

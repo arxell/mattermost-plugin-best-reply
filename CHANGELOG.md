@@ -5,6 +5,43 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- ESLint with the unified `plugin:@mattermost/react` config
+  (`@mattermost/eslint-plugin`), wired into `make check-style`.
+- `make coverage`, `make watch` and `make deploy` targets; the bundle now
+  includes a plugin icon (`assets/icon.svg`).
+
+### Changed
+
+- Toolchain: Node 24 via `.nvmrc` with `engines.node >=20`, exact pinned
+  dependency versions (`save-exact`), TypeScript target ES2022, Babel
+  config extracted to `babel.config.js` with modern browser targets and
+  core-js polyfills, webpack mode driven by the `--mode` flag.
+- The plugin version is derived from git tags
+  (`webapp/scripts/sync-manifest.mjs` generates `webapp/src/manifest.ts`
+  via `make apply`) instead of being hardcoded in three places.
+- `react`/`react-dom`/`react-redux`/`redux` moved to devDependencies (they
+  are webpack externals provided by the Mattermost webapp at runtime);
+  `@mattermost/types` updated to 11.9.0.
+
+### Internal
+
+- `PluginRegistry` typings extracted to
+  `webapp/src/types/mattermost-webapp/index.d.ts`.
+- Hand-rolled partial Mattermost state types and umbrella casts replaced
+  with `GlobalState` from `@mattermost/types`; the two remaining casts
+  (internal `views.rhs` slice, plugin state slice) are annotated with
+  pointers to `docs/api.md`.
+- Magic numbers (composer focus delay, preview polling, highlight fadeout,
+  thread page size, selection popup geometry) are named constants in
+  `webapp/src/constants.ts`.
+- `docs/api.md` now documents every internal dependency: string Redux
+  actions, `views.rhs`, `window.PostUtils`/`window.WebappUtils`, composer
+  and post DOM selectors, overridden core i18n keys, and timing constants.
+
 ## [1.1.0] - 2026-09-20
 
 ### Added
