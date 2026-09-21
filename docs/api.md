@@ -45,14 +45,34 @@ Consequences for selection quoting (`webapp/src/utils/selection.ts`):
 Used to open/close the RHS thread panel without a Mattermost fork. All are
 **undocumented and unstable**:
 
-- `SELECT_POST` with `{postId, channelId, timestamp: 0}` — opens the RHS
-  thread for the post; `postId: ''` closes it.
+- `SELECT_POST` with `{postId, channelId, timestamp}` — opens the RHS
+  thread for the post; `postId: ''` (with `timestamp: 0`) closes it. When
+  opening, `timestamp` is `Date.now()` so the reducer treats the selection
+  as fresh; when closing, `0` is enough.
 - `UPDATE_RHS_STATE` with `{state: null}` — resets the RHS panel state.
 - `RECEIVED_POSTS` / `RECEIVED_POSTS_IN_THREAD` — pre-fill the store so the
   thread panel renders without waiting for its own fetch.
+  `RECEIVED_POSTS_IN_THREAD` additionally carries `rootId` at the top level
+  of the action.
+- `RECEIVED_POST` with `{data: post}` — stores a single post fetched via
+  the REST API (`ensurePostLoaded`).
+- `HIGHLIGHT_REPLY` with `{postId}` — flashes the post in the open RHS
+  thread; `CLEAR_HIGHLIGHT_REPLY` clears it. The plugin clears the
+  highlight itself after `PERMALINK_FADEOUT_MS` (5000 ms), mirroring
+  Mattermost's own permalink fadeout. Re-dispatching `HIGHLIGHT_REPLY` for
+  the same post requires a `CLEAR_HIGHLIGHT_REPLY` first (plus a
+  `requestAnimationFrame`), otherwise the reducer sees no state change.
+
+The RHS slice read by the plugin (`views.rhs.selectedPostId`,
+`views.rhs.isSidebarOpen`, `views.rhs.highlightedPostId`,
+`views.rhsSuppressed`) is webapp-internal and absent from the packaged
+`@mattermost/types` `GlobalState`, so the code extends `GlobalState`
+locally in `webapp/src/actions/navigateToPost.ts`.
 
 The plugin state lives under `plugins-<plugin-id>` in the global store
-(`plugins-com.bestreply.plugin`).
+(`plugins-com.bestreply.plugin`). It is not part of the `GlobalState` type
+either; components read it through a narrowed cast typed directly as
+`{pendingReply: PendingReply | null}`.
 
 ## Global window objects
 
@@ -67,8 +87,34 @@ The plugin state lives under `plugins-<plugin-id>` in the global store
 - Center channel composer: `#post-create .AdvancedTextEditor [contenteditable="true"]` / `#post_textbox`.
 - Thread composer (RHS): `.sidebar--right .AdvancedTextEditor [contenteditable="true"]`.
 - Global Threads view: `.ThreadViewer .AdvancedTextEditor [contenteditable="true"]`.
-- The composer is focused via `setTimeout(250ms)` after opening a thread —
-  the panel is not mounted synchronously.
+- The composer preview portal mounts into `.AdvancedTextEditor__cell`
+  (`.ThreadViewer` / `.sidebar--right` for threads, `#post-create` for the
+  center channel).
+- The composer is focused via `setTimeout` after opening a thread
+  (`COMPOSER_FOCUS_DELAY_MS` = 250 ms) — the panel is not mounted
+  synchronously.
+
+## Timing constants
+
+All timing values live in `webapp/src/constants.ts`:
+
+| Constant | Value | Why |
+|---|---|---|
+| `COMPOSER_FOCUS_DELAY_MS` | 250 ms | RHS thread panel mounts asynchronously after `SELECT_POST`; focusing earlier hits no composer node. |
+| `PREVIEW_MOUNT_POLL_INTERVAL_MS` | 150 ms | The composer preview portal target (`.AdvancedTextEditor__cell`) appears on Mattermost's render schedule; there is no hook, so the plugin polls. |
+| `PREVIEW_MOUNT_POLL_TIMEOUT_MS` | 3000 ms | Polling stops after 3 s so a never-appearing composer does not leave a timer running forever. |
+| `PERMALINK_FADEOUT_MS` | 5000 ms | Matches Mattermost's own permalink highlight fadeout. |
+
+## Core localization keys overridden
+
+`registerTranslations` merges these webapp i18n keys to rename the native
+Reply action (the plugin's own button is the one labeled "Reply"):
+
+- `post_info.reply` → "Thread" / "Тред" / "Fil" / "Thread"
+- `post_info.comment_icon.tooltip.reply` → same set of translations
+
+These are core webapp keys; if Mattermost renames them, the native action
+label falls back to the original string.
 
 ## Post shape produced by the plugin
 
