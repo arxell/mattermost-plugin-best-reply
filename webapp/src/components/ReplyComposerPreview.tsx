@@ -7,6 +7,7 @@ import type {GlobalState} from '@mattermost/types/store';
 import ReplyQuote from './ReplyQuote';
 
 import {clearPendingReply} from '../actions/reply';
+import {PREVIEW_MOUNT_POLL_INTERVAL_MS, PREVIEW_MOUNT_POLL_TIMEOUT_MS} from '../constants';
 import {PLUGIN_STATE_KEY, type PendingReply} from '../types/store';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
 
@@ -64,8 +65,8 @@ const ReplyComposerPreview: React.FC = () => {
         };
 
         mountPreview();
-        const intervalId = window.setInterval(mountPreview, 150);
-        const timeoutId = window.setTimeout(() => window.clearInterval(intervalId), 3000);
+        const intervalId = window.setInterval(mountPreview, PREVIEW_MOUNT_POLL_INTERVAL_MS);
+        const timeoutId = window.setTimeout(() => window.clearInterval(intervalId), PREVIEW_MOUNT_POLL_TIMEOUT_MS);
 
         return () => {
             window.clearInterval(intervalId);

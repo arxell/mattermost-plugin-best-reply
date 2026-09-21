@@ -3,6 +3,8 @@ import type {Store} from 'redux';
 import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 
+import {THREAD_FETCH_PAGE_SIZE} from '../constants';
+
 type PostList = {
     order: string[];
     posts: Record<string, Post>;
@@ -61,7 +63,7 @@ export async function openThreadForPost(store: Store, postId: string): Promise<b
     }
 
     const rootId = getRootPostId(post);
-    const thread = await apiGet<PostList>(store, `/posts/${rootId}/thread?perPage=200`);
+    const thread = await apiGet<PostList>(store, `/posts/${rootId}/thread?perPage=${THREAD_FETCH_PAGE_SIZE}`);
 
     dispatch({
         type: RECEIVED_POSTS,

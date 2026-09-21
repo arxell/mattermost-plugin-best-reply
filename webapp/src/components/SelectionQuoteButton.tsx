@@ -8,6 +8,7 @@ import {useStore} from 'react-redux';
 import {ensurePostLoaded} from '../actions/navigateToPost';
 import {isReplyablePost} from '../actions/openThread';
 import {isReplyInThreadView, startReplyToPost} from '../actions/reply';
+import {SELECTION_POPUP_BOTTOM_MARGIN, SELECTION_POPUP_OFFSET, SELECTION_POPUP_WIDTH} from '../constants';
 import {useTranslation} from '../i18n';
 import {getSelectionQuoteContext, type SelectionQuoteContext} from '../utils/selection';
 
@@ -15,9 +16,6 @@ type OverlayState = SelectionQuoteContext & {
     top: number;
     left: number;
 };
-
-const POPUP_WIDTH = 96;
-const POPUP_OFFSET = 8;
 
 function readSelectionOverlay(): OverlayState | null {
     const context = getSelectionQuoteContext();
@@ -29,8 +27,8 @@ function readSelectionOverlay(): OverlayState | null {
     // positioned with position: fixed and clamped onscreen.
     return {
         ...context,
-        top: Math.min(context.rect.bottom + POPUP_OFFSET, window.innerHeight - 52),
-        left: Math.min(context.rect.left + (context.rect.width / 2), window.innerWidth - POPUP_WIDTH),
+        top: Math.min(context.rect.bottom + SELECTION_POPUP_OFFSET, window.innerHeight - SELECTION_POPUP_BOTTOM_MARGIN),
+        left: Math.min(context.rect.left + (context.rect.width / 2), window.innerWidth - SELECTION_POPUP_WIDTH),
     };
 }
 

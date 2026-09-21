@@ -5,6 +5,7 @@ import type {Post} from '@mattermost/types/posts';
 import {getOpenThreadRootId, isThreadRhsOpen} from './navigateToPost';
 import {openThreadForPost} from './openThread';
 
+import {COMPOSER_FOCUS_DELAY_MS} from '../constants';
 import {CLEAR_PENDING_REPLY, PLUGIN_STATE_KEY, SET_PENDING_REPLY, type PendingReply, type ReplyContext} from '../types/store';
 import {normalizeQuotedFragment} from '../utils/selection';
 
@@ -58,7 +59,7 @@ function focusComposer(context: ReplyContext, element?: HTMLElement): void {
                 break;
             }
         }
-    }, 250);
+    }, COMPOSER_FOCUS_DELAY_MS);
 }
 
 export function setPendingReply(store: Store, pendingReply: PendingReply | null): void {

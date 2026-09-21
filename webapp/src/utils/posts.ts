@@ -2,7 +2,7 @@ import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 import type {UserProfile} from '@mattermost/types/users';
 
-import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP, QUOTED_REPLY_TEXT_PROP} from '../constants';
+import {MAX_QUOTED_FRAGMENT_LENGTH, QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP, QUOTED_REPLY_TEXT_PROP} from '../constants';
 
 // The locale the user sees the webapp in; falls back to the server default
 // when the current user is not loaded yet.
@@ -66,7 +66,7 @@ export function getUserInitials(user?: UserProfile): string {
     return displayName.slice(0, 2).toUpperCase();
 }
 
-export function truncateMessage(message: string, maxLength = 500): string {
+export function truncateMessage(message: string, maxLength = MAX_QUOTED_FRAGMENT_LENGTH): string {
     const normalized = message.replace(/\s+/g, ' ').trim();
     if (normalized.length <= maxLength) {
         return normalized;

@@ -5,11 +5,11 @@ import type {GlobalState} from '@mattermost/types/store';
 
 import {getPostFromStore} from './openThread';
 
+import {PERMALINK_FADEOUT_MS} from '../constants';
 import {getPostFromState} from '../utils/posts';
 
 const HIGHLIGHT_REPLY = 'HIGHLIGHT_REPLY';
 const CLEAR_HIGHLIGHT_REPLY = 'CLEAR_HIGHLIGHT_REPLY';
-const PERMALINK_FADEOUT_MS = 5000;
 
 // GlobalState covers entities.*, but views.rhs is webapp-internal and
 // missing from the packaged @mattermost/types, so it stays a local
