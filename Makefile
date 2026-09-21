@@ -17,6 +17,7 @@ bundle:
 	rm -rf dist/$(PLUGIN_ID)
 	mkdir -p dist/$(PLUGIN_ID)/webapp/dist
 	cp plugin.json dist/$(PLUGIN_ID)/
+	cp -r assets dist/$(PLUGIN_ID)/
 	cp -r webapp/dist dist/$(PLUGIN_ID)/webapp/
 	# ustar format: Mattermost's extractor rejects the pax archives macOS bsdtar writes by default
 	cd dist && COPYFILE_DISABLE=1 tar --format=ustar -czf $(BUNDLE_NAME) $(PLUGIN_ID)
