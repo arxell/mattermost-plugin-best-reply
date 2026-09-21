@@ -21,8 +21,13 @@ the same commit.
 ```bash
 make check   # install deps + tsc
 make test    # install deps + vitest
-make dist    # build webapp + assemble dist/com.bestreply.plugin-1.1.0.tar.gz
+make dist    # build webapp + assemble dist/com.bestreply.plugin-<version>.tar.gz
 ```
+
+`make check-style` runs ESLint + tsc, `make coverage` produces the v8
+coverage report, `make watch` rebuilds on change, and `make deploy`
+uploads and enables the bundle on `$MM_SERVICESETTINGS_SITEURL` (default
+http://localhost:8065) using `$MM_ADMIN_TOKEN`.
 
 Test against a local server: upload the bundle
 (System Console → Plugin Management, or
