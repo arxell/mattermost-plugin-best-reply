@@ -1,12 +1,15 @@
 PLUGIN_ID := com.bestreply.plugin
-PLUGIN_VERSION := 1.1.0
+PLUGIN_VERSION ?= $(shell cd webapp && node scripts/sync-manifest.mjs --print)
 BUNDLE_NAME := $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
 
-.PHONY: all webapp bundle dist clean check test
+.PHONY: all apply webapp bundle dist clean check test
 
 all: dist
 
-webapp:
+apply:
+	cd webapp && node scripts/sync-manifest.mjs
+
+webapp: apply
 	cd webapp && npm install
 	cd webapp && npm run build
 
@@ -21,11 +24,11 @@ bundle:
 
 dist: webapp bundle
 
-check:
+check: apply
 	cd webapp && npm install
 	cd webapp && npm run check-types
 
-test:
+test: apply
 	cd webapp && npm install
 	cd webapp && npm run test
 
