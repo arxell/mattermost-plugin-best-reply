@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`@mattermost/eslint-plugin`), wired into `make check-style`.
 - `make coverage`, `make watch` and `make deploy` targets; the bundle now
   includes a plugin icon (`assets/icon.svg`).
+- Dependabot: weekly updates for npm (`/webapp`) and GitHub Actions.
 
 ### Changed
 
@@ -26,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `react`/`react-dom`/`react-redux`/`redux` moved to devDependencies (they
   are webpack externals provided by the Mattermost webapp at runtime);
   `@mattermost/types` updated to 11.9.0.
+- CI runs through the same make targets as the official Mattermost reusable
+  plugin workflow (`check-style`/`test`/`dist`), the coverage badge follows
+  the shared color thresholds, and the release job uses
+  `gh release create --generate-notes`.
+- README restructured to the unified layout (Features, Requirements,
+  Installation, Development, Release process, Limitations, License).
 
 ### Internal
 

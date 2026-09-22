@@ -19,15 +19,38 @@ the same commit.
 ## Dev loop
 
 ```bash
-make check   # install deps + tsc
-make test    # install deps + vitest
-make dist    # build webapp + assemble dist/com.bestreply.plugin-<version>.tar.gz
+make check-style   # ESLint + tsc (depends on apply)
+make test          # vitest (depends on apply)
+make coverage      # vitest with v8 coverage
+make dist          # build webapp + assemble dist/com.bestreply.plugin-<version>.tar.gz
 ```
 
-`make check-style` runs ESLint + tsc, `make coverage` produces the v8
-coverage report, `make watch` rebuilds on change, and `make deploy`
-uploads and enables the bundle on `$MM_SERVICESETTINGS_SITEURL` (default
-http://localhost:8065) using `$MM_ADMIN_TOKEN`.
+`make apply` regenerates `webapp/src/manifest.ts` from `plugin.json` +
+`git describe` and is a dependency of every target above, so it is never
+run by hand in practice. Only when invoking npm scripts directly inside
+`webapp/` (e.g. `npm run build` after a fresh clone) run
+`node scripts/sync-manifest.mjs` first — tsc/vitest/webpack all fail on the
+missing generated file otherwise.
+
+`make watch` rebuilds on change, and `make deploy` uploads and enables the
+bundle on `$MM_SERVICESETTINGS_SITEURL` (default http://localhost:8065)
+using `$MM_ADMIN_TOKEN`.
+
+## Publishing
+
+- CI mirrors the official Mattermost plugin pipeline through the same make
+  targets (`check-style`/`test`/`dist`); the reusable
+  `mattermost/actions-workflows` workflow is not used because it requires
+  Go unconditionally (setup-go + `go mod tidy`) and this repo has no
+  server component. If the reusable workflow ever gains a webapp-only mode,
+  switch back to it.
+- Releases are tag-driven only: `git tag vX.Y.Z` (with `plugin.json`
+  version bumped to match) triggers the release job — never create
+  releases or tags manually without an explicit request. The bundle version
+  comes from the git tag via `sync-manifest.mjs`.
+- The coverage badge lives on the orphaned-style `coverage-badge` branch,
+  rewritten on every push to main (`coverage-badge.json` is gitignored on
+  main).
 
 Test against a local server: upload the bundle
 (System Console → Plugin Management, or
