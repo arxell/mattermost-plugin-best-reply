@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-09-22
+
+### Fixed
+
+- `@mentions` inside quoted replies are rendered as mention links again
+  instead of plain text: the reply body is now formatted with
+  `atMentions: true` (and the post's channel id, so the profile popover
+  has channel context). Mention rendering part of #15, restored without
+  the quote-click navigation change.
+
 ## [1.2.1] - 2026-09-22
 
 ### Fixed
