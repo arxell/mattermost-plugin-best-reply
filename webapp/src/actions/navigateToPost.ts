@@ -3,7 +3,7 @@ import type {Store} from 'redux';
 import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 
-import {getPostFromStore, openThreadForPost} from './openThread';
+import {getPostFromStore} from './openThread';
 
 import {PERMALINK_FADEOUT_MS} from '../constants';
 import {getPostFromState} from '../utils/posts';
@@ -71,10 +71,6 @@ function highlightPostInOpenThread(store: Store, postId: string): void {
     scheduleHighlightClear(store);
 }
 
-function getRootPostId(post: Post): string {
-    return post.root_id || post.id;
-}
-
 function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {
     const state: MattermostState = store.getState();
 
@@ -89,26 +85,6 @@ function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {
 
     highlightPostInOpenThread(store, post.id);
     return true;
-}
-
-async function tryOpenSameThreadReply(store: Store, post: Post, replyPost: Post): Promise<boolean> {
-    const replyThreadRootId = getRootPostId(replyPost);
-    if (!replyThreadRootId || !isPostInThread(post, replyThreadRootId)) {
-        return false;
-    }
-
-    const currentThreadRootId = getOpenThreadRootId(store.getState());
-    if (currentThreadRootId === replyThreadRootId) {
-        highlightPostInOpenThread(store, post.id);
-        return true;
-    }
-
-    // Open the thread in the RHS without switching the center channel.
-    const opened = await openThreadForPost(store, post.id);
-    if (opened) {
-        highlightPostInOpenThread(store, post.id);
-    }
-    return opened;
 }
 
 function getSiteUrl(store: Store): string {
@@ -183,23 +159,10 @@ declare global {
     }
 }
 
-type NavigateOptions = {
-
-    // The reply post that was clicked. When it lives inside a thread and the
-    // quoted post is part of the same thread, the current channel is kept and
-    // the RHS thread panel is opened/highlighted instead of jumping to a
-    // permalink.
-    replyPost?: Post;
-};
-
-export async function navigateToQuotedPost(store: Store, postId: string, options?: NavigateOptions): Promise<boolean> {
+export async function navigateToQuotedPost(store: Store, postId: string): Promise<boolean> {
     const post = await ensurePostLoaded(store, postId);
     if (!post) {
         return false;
-    }
-
-    if (options?.replyPost && await tryOpenSameThreadReply(store, post, options.replyPost)) {
-        return true;
     }
 
     if (tryNavigateWithinOpenThread(store, post)) {
