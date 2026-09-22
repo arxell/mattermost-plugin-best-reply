@@ -42,7 +42,7 @@
         "style-loader": "3.3.4",
         "typescript": "5.5.4",
         "vitest": "5.0.1",
-        "webpack": "5.95.0",
+        "webpack": "5.111.1",
         "webpack-cli": "5.1.4"
     },
     "dependencies": {
