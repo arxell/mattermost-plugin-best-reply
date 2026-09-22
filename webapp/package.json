@@ -16,7 +16,7 @@
         "coverage": "vitest run --coverage"
     },
     "devDependencies": {
-        "@babel/core": "7.25.2",
+        "@babel/core": "8.0.6",
         "@babel/preset-env": "7.25.4",
         "@babel/preset-react": "7.24.7",
         "@babel/preset-typescript": "7.24.7",
