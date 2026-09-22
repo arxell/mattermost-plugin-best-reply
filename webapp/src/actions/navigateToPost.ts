@@ -1,28 +1,20 @@
-import type {Post} from '@mattermost/types/posts';
 import type {Store} from 'redux';
 
+import type {Post} from '@mattermost/types/posts';
+import type {GlobalState} from '@mattermost/types/store';
+
 import {getPostFromStore} from './openThread';
+
+import {PERMALINK_FADEOUT_MS} from '../constants';
 import {getPostFromState} from '../utils/posts';
 
 const HIGHLIGHT_REPLY = 'HIGHLIGHT_REPLY';
 const CLEAR_HIGHLIGHT_REPLY = 'CLEAR_HIGHLIGHT_REPLY';
-const PERMALINK_FADEOUT_MS = 5000;
 
-type MattermostState = {
-    entities: {
-        general: {
-            config: {
-                SiteURL: string;
-            };
-        };
-        channels: {
-            channels: Record<string, {team_id?: string}>;
-        };
-        teams: {
-            currentTeamId: string;
-            teams: Record<string, {name: string}>;
-        };
-    };
+// GlobalState covers entities.*, but views.rhs is webapp-internal and
+// missing from the packaged @mattermost/types, so it stays a local
+// extension (docs/api.md#internal-redux-actions).
+type MattermostState = GlobalState & {
     views?: {
         rhs?: {
             selectedPostId?: string;
@@ -63,7 +55,7 @@ function scheduleHighlightClear(store: Store): void {
 }
 
 function highlightPostInOpenThread(store: Store, postId: string): void {
-    const state = store.getState() as MattermostState;
+    const state: MattermostState = store.getState();
     const currentHighlight = state.views?.rhs?.highlightedPostId;
 
     if (currentHighlight === postId) {
@@ -80,7 +72,7 @@ function highlightPostInOpenThread(store: Store, postId: string): void {
 }
 
 function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {
-    const state = store.getState() as MattermostState;
+    const state: MattermostState = store.getState();
 
     if (!isThreadRhsOpen(state)) {
         return false;
@@ -96,20 +88,19 @@ function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {
 }
 
 function getSiteUrl(store: Store): string {
-    const state = store.getState() as MattermostState;
+    const state: GlobalState = store.getState();
     return state.entities.general.config.SiteURL || window.location.origin;
 }
 
-function getTeamNameForPost(state: unknown, post: Post): string | null {
-    const mattermostState = state as MattermostState;
-    const channel = mattermostState.entities.channels?.channels?.[post.channel_id];
-    const teamId = channel?.team_id || mattermostState.entities.teams?.currentTeamId;
-    const team = teamId ? mattermostState.entities.teams?.teams?.[teamId] : undefined;
+function getTeamNameForPost(state: MattermostState, post: Post): string | null {
+    const channel = state.entities.channels.channels[post.channel_id];
+    const teamId = channel?.team_id || state.entities.teams.currentTeamId;
+    const team = teamId ? state.entities.teams.teams[teamId] : undefined;
 
     return team?.name || null;
 }
 
-export function getPermalinkPath(state: unknown, postId: string): string | null {
+export function getPermalinkPath(state: MattermostState, postId: string): string | null {
     const post = getPostFromState(state, postId);
     if (!post) {
         return null;

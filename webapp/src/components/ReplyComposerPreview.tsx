@@ -4,16 +4,21 @@ import {useSelector, useStore} from 'react-redux';
 
 import type {GlobalState} from '@mattermost/types/store';
 
+import ReplyQuote from './ReplyQuote';
+
 import {clearPendingReply} from '../actions/reply';
+import {PREVIEW_MOUNT_POLL_INTERVAL_MS, PREVIEW_MOUNT_POLL_TIMEOUT_MS} from '../constants';
 import {PLUGIN_STATE_KEY, type PendingReply} from '../types/store';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
-import ReplyQuote from './ReplyQuote';
 
 const ReplyComposerPreview: React.FC = () => {
     const store = useStore();
     const pendingReply = useSelector((state: GlobalState) => {
-        const pluginState = (state as unknown as Record<string, {pendingReply: unknown}>)[PLUGIN_STATE_KEY];
-        return pluginState?.pendingReply as PendingReply | null;
+        // The plugin slice is mounted under `plugins-<plugin-id>` by
+        // registerReducer and is not part of GlobalState
+        // (docs/api.md#internal-redux-actions).
+        const pluginState = (state as unknown as Record<string, {pendingReply: PendingReply | null} | undefined>)[PLUGIN_STATE_KEY];
+        return pluginState?.pendingReply ?? null;
     });
 
     const replyPost = useSelector((state: GlobalState) => {
@@ -42,10 +47,8 @@ const ReplyComposerPreview: React.FC = () => {
 
         const mountPreview = () => {
             const mountTarget = (
-                pendingReply.context === 'thread' ?
-                    document.querySelector('.ThreadViewer .AdvancedTextEditor__cell') ||
-                    document.querySelector('.sidebar--right .AdvancedTextEditor__cell') :
-                    document.querySelector('#post-create .AdvancedTextEditor__cell')
+                pendingReply.context === 'thread' ? document.querySelector('.ThreadViewer .AdvancedTextEditor__cell') ||
+                    document.querySelector('.sidebar--right .AdvancedTextEditor__cell') : document.querySelector('#post-create .AdvancedTextEditor__cell')
             ) as HTMLElement | null;
 
             if (!mountTarget) {
@@ -62,8 +65,8 @@ const ReplyComposerPreview: React.FC = () => {
         };
 
         mountPreview();
-        const intervalId = window.setInterval(mountPreview, 150);
-        const timeoutId = window.setTimeout(() => window.clearInterval(intervalId), 3000);
+        const intervalId = window.setInterval(mountPreview, PREVIEW_MOUNT_POLL_INTERVAL_MS);
+        const timeoutId = window.setTimeout(() => window.clearInterval(intervalId), PREVIEW_MOUNT_POLL_TIMEOUT_MS);
 
         return () => {
             window.clearInterval(intervalId);

@@ -1,7 +1,8 @@
 import {useSelector} from 'react-redux';
 
-import {getCurrentUserLocale} from '../utils/posts';
 import {messages, type Locale, type MessageId} from './messages';
+
+import {getCurrentUserLocale} from '../utils/posts';
 
 // Fallback chain: unknown locale -> en -> the key itself.
 export function translate(locale: string, id: MessageId): string {

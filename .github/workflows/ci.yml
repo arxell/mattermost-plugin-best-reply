@@ -9,17 +9,20 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  # Webapp-only equivalent of mattermost/actions-workflows plugin-ci: the
-  # official reusable workflow installs Go unconditionally (go.mod), and this
-  # repository is webapp-only, so the same lint/test/build pipeline runs
-  # directly here.
+  # Webapp-only mirror of mattermost/actions-workflows plugin-ci: the
+  # reusable workflow requires Go (setup-go reads go.mod, its lint step runs
+  # "go mod tidy" unconditionally), and this repository has no server
+  # component. The same lint/test/build pipeline runs here through the same
+  # make targets the reusable workflow calls (check-style / test / dist).
   plugin-ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # sync-manifest.mjs derives the version from git tags
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -31,20 +34,16 @@ jobs:
         run: npm ci
         working-directory: webapp
 
-      - name: Type check
-        run: npm run check
-        working-directory: webapp
+      # make targets depend on `apply`, which generates
+      # webapp/src/manifest.ts before tsc/vitest/webpack run
+      - name: Lint and type check
+        run: make check-style
 
       - name: Unit tests
-        run: npm run test
-        working-directory: webapp
+        run: make test
 
-      - name: Build webapp bundle
-        run: npm run build
-        working-directory: webapp
-
-      - name: Assemble plugin bundle
-        run: make bundle
+      - name: Build plugin bundle
+        run: make dist
 
       - name: Upload plugin bundle
         uses: actions/upload-artifact@v4
@@ -70,26 +69,26 @@ jobs:
       - run: npm ci
         working-directory: webapp
 
-      - run: npx vitest run --coverage
-        working-directory: webapp
+      - run: make coverage
 
       - name: Build badge JSON
-        run: >
-          node -e "const s=require('./webapp/coverage/coverage-summary.json');const pct=s.total.lines.pct;
-          const color=pct>=80?'brightgreen':pct>=60?'yellow':'red';
-          require('fs').writeFileSync('coverage-badge.json',JSON.stringify({schemaVersion:1,label:'coverage',message:pct+'%',color})+'\n');"
+        run: |
+          pct=$(node -p "require('./webapp/coverage/coverage-summary.json').total.lines.pct")
+          color=$(node -p "$pct >= 80 ? 'green' : ($pct >= 60 ? 'yellow' : 'red')")
+          node -e "const fs=require('fs'); fs.writeFileSync('coverage-badge.json', JSON.stringify({schemaVersion:1,label:'coverage',message:process.argv[1]+'%',color:process.argv[2]}))" "$pct" "$color"
           cat coverage-badge.json
 
       - name: Publish badge branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin coverage-badge || true
           git checkout -B coverage-badge
           git add coverage-badge.json
           git commit -m "Update coverage badge [skip ci]" || exit 0
           # The badge commit is not part of main's history, so the branch
           # is rewritten on every run.
-          git push --force origin coverage-badge
+          git push --force-with-lease origin HEAD:coverage-badge
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -98,6 +97,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download plugin bundle
         uses: actions/download-artifact@v4
         with:
@@ -116,9 +117,4 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz
-          --title "$GITHUB_REF_NAME" --generate-notes
-          --repo "$GITHUB_REPOSITORY"
-          || gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz
-          --clobber --repo "$GITHUB_REPOSITORY"
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes dist/*.tar.gz

@@ -1,0 +1,13 @@
+{
+    "root": true,
+    "extends": [
+        "plugin:@mattermost/react"
+    ],
+    "rules": {
+        "header/header": "off"
+    },
+    "ignorePatterns": [
+        "dist/",
+        "coverage/"
+    ]
+}

@@ -125,7 +125,7 @@ const ReplyQuote: React.FC<Props> = ({
                         onClose();
                     }}
                 >
-                    ×
+                    {'×'}
                 </button>
             )}
         </>

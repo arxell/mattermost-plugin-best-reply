@@ -1,38 +1,23 @@
 import React from 'react';
 import type {Store} from 'redux';
 
-import type {GlobalState} from '@mattermost/types/store';
 import type {Post} from '@mattermost/types/posts';
+import type {GlobalState} from '@mattermost/types/store';
 
-import manifest from './manifest';
-import reducer from './reducers';
-import ReplyButton from './components/ReplyButton';
-import ReplyComposerPreview from './components/ReplyComposerPreview';
+import {getPostFromStore, isReplyablePost} from './actions/openThread';
+import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
+import ErrorBoundary from './components/ErrorBoundary';
 import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
+import ReplyButton from './components/ReplyButton';
+import ReplyComposerPreview from './components/ReplyComposerPreview';
 import SelectionQuoteButton from './components/SelectionQuoteButton';
-import ErrorBoundary from './components/ErrorBoundary';
 import {QUOTED_REPLY_POST_TYPE} from './constants';
-import {buildQuotedReplyPost} from './utils/mobileQuote';
 import {getTranslationsForLocale} from './i18n';
-import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
-import {getPostFromStore, isReplyablePost} from './actions/openThread';
-
-type PluginRegistry = {
-    registerReducer: (reducerToRegister: typeof reducer) => void;
-    registerPostActionComponent: (component: React.ComponentType<{post: Post}>) => string;
-    registerPostDropdownMenuAction: (
-        text: React.ReactNode,
-        action: (postId: string) => void,
-        filter?: (postId: string) => boolean,
-    ) => string;
-    registerRootComponent: (component: React.ComponentType) => string;
-    registerPostTypeComponent: (type: string, component: React.ComponentType<{post: Post}>) => string;
-    registerMessageWillBePostedHook: (
-        hook: (post: Post) => {post: Post} | {error: {message: string}} | Promise<{post: Post} | {error: {message: string}}>,
-    ) => string;
-    registerTranslations: (getTranslationsForLocale: (locale: string) => Record<string, string>) => void;
-};
+import manifest from './manifest';
+import reducer from './reducers';
+import type {PluginRegistry} from './types/mattermost-webapp';
+import {buildQuotedReplyPost} from './utils/mobileQuote';
 
 // The registry expects component types, not elements (passing JSX here throws
 // React #130 and unmounts the whole app); every component is additionally
@@ -70,7 +55,7 @@ export default class Plugin {
             (postId: string) => {
                 const post = getPostFromStore(store, postId);
                 if (post) {
-                    void startReplyToPost(store, post, {context: 'thread'});
+                    startReplyToPost(store, post, {context: 'thread'});
                 }
             },
             (postId: string) => {

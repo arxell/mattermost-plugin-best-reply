@@ -1,18 +1,9 @@
-import type {Post} from '@mattermost/types/posts';
 import type {Store} from 'redux';
 
-type MattermostState = {
-    entities: {
-        general: {
-            config: {
-                SiteURL: string;
-            };
-        };
-        posts: {
-            posts: Record<string, Post>;
-        };
-    };
-};
+import type {Post} from '@mattermost/types/posts';
+import type {GlobalState} from '@mattermost/types/store';
+
+import {THREAD_FETCH_PAGE_SIZE} from '../constants';
 
 type PostList = {
     order: string[];
@@ -24,12 +15,12 @@ const RECEIVED_POSTS = 'RECEIVED_POSTS';
 const RECEIVED_POSTS_IN_THREAD = 'RECEIVED_POSTS_IN_THREAD';
 
 function getSiteUrl(store: Store): string {
-    const state = store.getState() as MattermostState;
+    const state: GlobalState = store.getState();
     return state.entities.general.config.SiteURL || window.location.origin;
 }
 
 export function getPostFromStore(store: Store, postId: string): Post | undefined {
-    const state = store.getState() as MattermostState;
+    const state: GlobalState = store.getState();
     return state.entities.posts.posts[postId];
 }
 
@@ -72,7 +63,7 @@ export async function openThreadForPost(store: Store, postId: string): Promise<b
     }
 
     const rootId = getRootPostId(post);
-    const thread = await apiGet<PostList>(store, `/posts/${rootId}/thread?perPage=200`);
+    const thread = await apiGet<PostList>(store, `/posts/${rootId}/thread?perPage=${THREAD_FETCH_PAGE_SIZE}`);
 
     dispatch({
         type: RECEIVED_POSTS,

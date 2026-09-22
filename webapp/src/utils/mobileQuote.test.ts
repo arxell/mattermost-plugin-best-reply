@@ -1,7 +1,9 @@
 import {describe, expect, it} from 'vitest';
+
 import type {Post} from '@mattermost/types/posts';
 
 import {formatMobileQuoteBlock, buildQuotedReplyPost} from './mobileQuote';
+
 import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP, QUOTED_REPLY_TEXT_PROP} from '../constants';
 import type {PendingReply} from '../types/store';
 

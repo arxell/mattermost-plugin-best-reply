@@ -65,6 +65,7 @@ describe('extractPostIdFromElement', () => {
     it('does not treat data-testid="post-message-text" as a post id', () => {
         const post = renderPost(POST_ID, 'hello', `post_${POST_ID}`);
         const body = post.querySelector('.post-message__text')!;
+
         // The element itself carries data-testid="post-message-text"; walking
         // must not stop there with "text" as the id.
         expect(extractPostIdFromElement(body)).toBe(POST_ID);
