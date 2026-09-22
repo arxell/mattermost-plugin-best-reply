@@ -3,6 +3,7 @@
 // the Best Reply pending-reply flow.
 
 import React, {useCallback, useEffect, useState} from 'react';
+import {createPortal} from 'react-dom';
 import {useStore} from 'react-redux';
 
 import {ensurePostLoaded} from '../actions/navigateToPost';
@@ -93,7 +94,9 @@ const SelectionQuoteButton: React.FC = () => {
         return null;
     }
 
-    return (
+    // Render directly into <body> so no ancestor stacking context, opacity,
+    // or transform can make the popup translucent or mis-positioned.
+    return createPortal(
         <button
             type='button'
             className='best-reply-selection-popup'
@@ -104,7 +107,8 @@ const SelectionQuoteButton: React.FC = () => {
             }}
         >
             {t('quote_action')}
-        </button>
+        </button>,
+        document.body,
     );
 };
 

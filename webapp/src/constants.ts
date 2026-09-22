@@ -26,5 +26,5 @@ export const THREAD_FETCH_PAGE_SIZE = 200;
 // Selection popup geometry: fixed width, small offset below the selection,
 // and a bottom margin so the popup never leaves the viewport.
 export const SELECTION_POPUP_WIDTH = 96;
-export const SELECTION_POPUP_OFFSET = 8;
+export const SELECTION_POPUP_OFFSET = 12;
 export const SELECTION_POPUP_BOTTOM_MARGIN = 52;
