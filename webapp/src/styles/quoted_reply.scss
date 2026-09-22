@@ -247,13 +247,21 @@ body.quoted-reply-plugin-active {
     padding: 0 12px;
     border: 1px solid rgba(18, 100, 163, 0.32);
     border-radius: 6px;
-    background: var(--center-channel-bg, #fff);
+    // Force a fully opaque background so post text does not show through
+    // even when the theme's --center-channel-bg is translucent. The !important
+    // guards against host styles that might otherwise override the popup.
+    background: rgba(var(--center-channel-bg-rgb, 255, 255, 255), 1) !important;
+    opacity: 1 !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     color: #1264a3;
     font-size: 13px;
     font-weight: 600;
     line-height: 1;
+    white-space: nowrap;
     cursor: pointer;
+    // Center the popup horizontally over the middle of the selection.
+    // `left` is set to selection center; translate shifts it back by half its own width.
+    transform: translateX(-50%);
 
     &:hover,
     &:focus-visible {
