@@ -19,7 +19,7 @@ jobs:
   plugin-ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # sync-manifest.mjs derives the version from git tags
           fetch-depth: 0
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -97,7 +97,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download plugin bundle
         uses: actions/download-artifact@v4
