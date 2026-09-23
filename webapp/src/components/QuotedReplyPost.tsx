@@ -32,6 +32,7 @@ type Props = {
 
 const QuotedReplyPost: React.FC<Props> = ({post}) => {
     const store = useStore();
+    const containerRef = React.useRef<HTMLDivElement>(null);
     const replyToPostId = post.props?.[QUOTED_REPLY_PROP] as string | undefined;
     const quotedFragment = getQuotedFragment(post);
 
@@ -61,8 +62,8 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
             return;
         }
 
-        navigateToQuotedPost(store, replyToPostId);
-    }, [replyToPostId, store]);
+        navigateToQuotedPost(store, replyToPostId, {replyPost: post, sourceElement: containerRef.current});
+    }, [replyToPostId, store, post]);
 
     const replyBody = getQuotedReplyBody(post);
     const formattedBody = useMemo(() => {
@@ -78,7 +79,10 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
     }, [post.edit_at, post.id, post.channel_id, replyBody]);
 
     return (
-        <div className='quoted-reply-post'>
+        <div
+            className='quoted-reply-post'
+            ref={containerRef}
+        >
             {(replyPost || quotedFragment) && (
                 <ReplyQuote
                     post={replyPost ?? post}
