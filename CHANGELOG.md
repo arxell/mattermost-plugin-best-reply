@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- The quote preview's close button no longer sits underneath the
-  composer's floating preview toggle: the preview bar reserves the same
-  top-right strip Mattermost's editor uses for its own actions.
+- The quote preview's close button no longer overlaps the composer's
+  floating preview toggle: the close button and the quote text are held
+  left of the strip Mattermost reserves for its top-right editor
+  actions (up to 47px from the right edge in the scrollbar variant).
 
 ## [1.2.3] - 2026-09-23
 
