@@ -166,6 +166,19 @@
 
 .quoted-reply-composer-preview {
     padding: 0 0 8px;
+
+    // Mattermost floats its preview toggle (TexteditorActions,
+    // placement='top') over the top-right of the composer cell: a 32px
+    // button 7px off the right edge, or 15px with the scrollbar variant —
+    // 47px from the edge at worst. Keep the quote full width but hold its
+    // close button and text clear of that strip (v11.11 geometry).
+    .quoted-reply-quote {
+        padding-right: 88px;
+    }
+
+    .quoted-reply-quote__close {
+        right: 56px;
+    }
 }
 
 .quoted-reply-post {
