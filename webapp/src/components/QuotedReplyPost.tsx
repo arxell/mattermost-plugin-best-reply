@@ -13,6 +13,8 @@ import {getPostFromState, getUserFromState, getDisplayName, getQuotedReplyBody, 
 type PostFormatOptions = {
     postId?: string;
     editedAt?: number;
+    atMentions?: boolean;
+    channelId?: string;
 };
 
 declare global {
@@ -67,11 +69,13 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
         const formatOptions: PostFormatOptions = {
             postId: post.id,
             editedAt: post.edit_at || 0,
+            atMentions: true,
+            channelId: post.channel_id,
         };
         const formattedText = window.PostUtils.formatText(replyBody, formatOptions);
 
         return window.PostUtils.messageHtmlToComponent(formattedText, false, formatOptions);
-    }, [post.edit_at, post.id, replyBody]);
+    }, [post.edit_at, post.id, post.channel_id, replyBody]);
 
     return (
         <div className='quoted-reply-post'>
