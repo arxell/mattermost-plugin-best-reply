@@ -1,18 +1,18 @@
 {
     "id": "com.bestreply.plugin",
     "name": "Best Reply",
-    "description": "Reply in channel or thread with a quote block, or quote just a selected fragment of a message. Clickable quotes navigate to the original post.",
+    "description": "Reply in the source thread with a quote block, or quote a selected fragment in the current channel or thread. Clickable quotes navigate to the original post.",
     "homepage_url": "https://github.com/arxell/mattermost-plugin-best-reply",
     "support_url": "https://github.com/arxell/mattermost-plugin-best-reply/issues",
     "release_notes_url": "https://github.com/arxell/mattermost-plugin-best-reply/releases",
-    "version": "1.2.4",
+    "version": "1.3.0",
     "icon_path": "assets/icon.svg",
     "min_server_version": "9.0.0",
     "webapp": {
         "bundle_path": "webapp/dist/main.js"
     },
     "settings_schema": {
-        "header": "Reply in channel or in thread with a quote block. Select part of a message to quote only that fragment.",
+        "header": "Replies open the source thread. Select part of a message to quote that fragment in the current channel or thread.",
         "footer": "",
         "settings": []
     }
