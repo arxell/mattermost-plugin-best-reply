@@ -59,3 +59,86 @@ describe('unloaded quote originals', () => {
         expect(document.body.textContent).toContain('My answer');
     });
 });
+
+describe('channel mentions in reply bodies', () => {
+    const team = {id: 'team', name: 'audit', display_name: 'Audit'};
+    const otherTeam = {id: 'other', name: 'other-team', display_name: 'Other'};
+    const channel = {id: 'channel', team_id: team.id, name: 'review', display_name: 'Review'};
+    const target = {id: 'target', team_id: team.id, name: 'release-planning', display_name: 'Планирование выпуска'};
+
+    function makeState() {
+        return {entities: {
+            posts: {posts: {}},
+            users: {profiles: {}},
+            channels: {channels: {channel, target, foreign: {...target, id: 'foreign', team_id: otherTeam.id, display_name: 'Wrong team'}}},
+            teams: {currentTeamId: otherTeam.id, teams: {team, other: otherTeam}},
+        }} as unknown as GlobalState;
+    }
+
+    async function renderReply(state: GlobalState, mentions?: unknown) {
+        const post = {...reply, message: 'Обсудим в ~release-planning.', props: {channel_mentions: mentions}};
+        const formatText = vi.fn<typeof window.PostUtils.formatText>((text) => text);
+        window.PostUtils.formatText = formatText;
+        const store = createStore((previous = state, action: {type: string; state?: GlobalState}) => action.state || previous);
+        await act(async () => root.render(<Provider store={store}><QuotedReplyPost post={post}/></Provider>));
+        return {store, formatText};
+    }
+
+    it('formats legacy mentions in the post team, even when another team is selected', async () => {
+        const {formatText} = await renderReply(makeState());
+        expect(formatText).toHaveBeenLastCalledWith('Обсудим в ~release-planning.', expect.objectContaining({
+            team,
+            channelNamesMap: {review: 'Review', 'release-planning': 'Планирование выпуска'},
+            channelId: 'channel',
+            atMentions: true,
+        }));
+    });
+
+    it('prefers server channel metadata and supports a channel absent from the local cache', async () => {
+        const remote = {display_name: 'Другой канал', team_name: 'remote-team'};
+        const {formatText} = await renderReply(makeState(), {'release-planning': remote, unloaded: remote});
+        expect(formatText.mock.lastCall?.[1]).toMatchObject({channelNamesMap: {'release-planning': remote, unloaded: remote}});
+    });
+
+    it('uses the selected team for a direct-message channel', async () => {
+        const state = makeState();
+        state.entities.channels.channels.channel = {...state.entities.channels.channels.channel, team_id: ''};
+        const {formatText} = await renderReply(state);
+        expect(formatText.mock.lastCall?.[1]).toMatchObject({team: otherTeam, channelNamesMap: {'release-planning': 'Wrong team'}});
+    });
+
+    it('reformats when channel data arrives or a display name changes', async () => {
+        const state = makeState();
+        delete state.entities.channels.channels.target;
+        const {store, formatText} = await renderReply(state);
+        const updated = makeState();
+        updated.entities.channels.channels.target = {...target, display_name: 'Новое название'} as never;
+        await act(async () => store.dispatch({type: 'RECEIVED_CHANNEL', state: updated}));
+        expect(formatText.mock.lastCall?.[1]).toMatchObject({channelNamesMap: {'release-planning': 'Новое название'}});
+    });
+
+    it.each([
+        [null], ['invalid'], [[]],
+        [{broken: null, bad: {display_name: 42}, wrongteam: {display_name: 'Invalid', team_name: 42}}],
+        [{hasOwnProperty: 'Invalid', 'bad"name': 'Invalid', badteam: {display_name: 'Invalid', team_name: 'bad"team'}}],
+    ])('ignores malformed metadata without losing the reply: %j', async (mentions) => {
+        const {formatText} = await renderReply(makeState(), mentions);
+        expect(formatText.mock.lastCall?.[1]?.channelNamesMap).toEqual({review: 'Review', 'release-planning': 'Планирование выпуска'});
+        expect(document.body.textContent).toContain('Обсудим в ~release-planning.');
+    });
+
+    it('keeps only self-contained mentions when team context is unavailable', async () => {
+        const state = {entities: {posts: {posts: {}}, users: {profiles: {}}}} as unknown as GlobalState;
+        const remote = {display_name: 'Канал', team_name: 'audit'};
+        const {formatText} = await renderReply(state, {remote, legacy: 'No team', missingTeam: {display_name: 'No team'}});
+        expect(formatText.mock.lastCall?.[1]).toMatchObject({channelNamesMap: {remote}});
+    });
+
+    it('does not guess the team of a post whose channel is not loaded', async () => {
+        const state = makeState();
+        delete state.entities.channels.channels.channel;
+        const {formatText} = await renderReply(state);
+        expect(formatText.mock.lastCall?.[1]?.team).toBeUndefined();
+        expect(formatText.mock.lastCall?.[1]?.channelNamesMap).toEqual({});
+    });
+});

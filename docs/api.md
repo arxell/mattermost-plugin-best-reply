@@ -82,6 +82,21 @@ either; components read it through a narrowed cast typed directly as
 - `window.WebappUtils.browserHistory` — client-side navigation used for
   permalink jumps (with a `window.location.assign` fallback).
 
+### Channel mentions in reply bodies
+
+`PostUtils.formatText` requires `channelNamesMap` and a `team` for `~channel`
+links; `channelId` alone does not resolve them. Values are display-name strings
+or `{display_name, team_name}` objects. Use channels from the post's team
+(the selected team for DMs), then overlay validated `post.props.channel_mentions`
+from the server so unloaded and cross-team channel links retain their target.
+Without a team, pass only entries with their own `team_name`: otherwise the
+host formatter can emit an unresolved `$MM_CHANNELMENTION...$` token.
+Unknown channel names remain text; Markdown/code parsing stays with Mattermost.
+
+Source contract: Mattermost [v9.0.0](https://github.com/mattermost/mattermost/blob/v9.0.0/webapp/channels/src/utils/text_formatting.tsx)
+and [v11.11.0](https://github.com/mattermost/mattermost/blob/v11.11.0/webapp/channels/src/utils/text_formatting.tsx),
+`autolinkChannelMentions`.
+
 ## Composer DOM
 
 - Center channel composer: `#post-create .AdvancedTextEditor [contenteditable="true"]` / `#post_textbox`.
