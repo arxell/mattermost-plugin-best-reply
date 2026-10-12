@@ -80,10 +80,6 @@ export function getPendingReply(store: Store): PendingReply | null {
     return state[PLUGIN_STATE_KEY]?.pendingReply || null;
 }
 
-export function isReplyInThreadView(element: HTMLElement): boolean {
-    return Boolean(element.closest('.sidebar--right, .ThreadViewer'));
-}
-
 function isInGlobalThreadViewer(element?: HTMLElement): boolean {
     return Boolean(element?.closest('.ThreadViewer') && !element.closest('.sidebar--right'));
 }

@@ -8,7 +8,7 @@ import {useStore} from 'react-redux';
 
 import {ensurePostLoaded} from '../actions/navigateToPost';
 import {isReplyablePost} from '../actions/openThread';
-import {isReplyInThreadView, startReplyToPost} from '../actions/reply';
+import {startReplyToPost} from '../actions/reply';
 import {SELECTION_POPUP_BOTTOM_MARGIN, SELECTION_POPUP_OFFSET, SELECTION_POPUP_WIDTH} from '../constants';
 import {useTranslation} from '../i18n';
 import {getSelectionQuoteContext, type SelectionQuoteContext} from '../utils/selection';
@@ -48,7 +48,7 @@ const SelectionQuoteButton: React.FC = () => {
         }
 
         await startReplyToPost(store, post, {
-            context: isReplyInThreadView(current.messageBody) ? 'thread' : 'channel',
+            context: 'thread',
             element: current.messageBody,
             selectedText: current.selectedText,
         });

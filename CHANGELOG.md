@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Quote and Ctrl+Q now compose selected fragments inside the source message's
+  thread, including the first reply from the channel.
+
 ## [1.3.0] - 2026-10-12
 
 ### Changed
