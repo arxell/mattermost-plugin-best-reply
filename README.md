@@ -6,7 +6,7 @@
 [![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-blue)](https://github.com/arxell/mattermost-plugin-best-reply/releases/latest)
 [![coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Farxell%2Fmattermost-plugin-best-reply%2Fcoverage-badge%2Fcoverage-badge.json)](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml)
 
-**Reply to a message in the channel stream or in a thread — with a visible quote block. Select a fragment to quote only that part.**
+**Reply to any message in its thread — with a visible quote block. Select a fragment to quote only that part.**
 
 </div>
 
@@ -17,17 +17,13 @@ Best Reply merges two plugins into one:
 
 ## Features
 
-![Reply in channel with a quote block](docs/images/reply-in-channel.png)
-
-*Reply in channel with a full-message quote.*
-
 ![Quote a selected fragment](docs/images/quote-fragment.png)
 
 *Select a fragment — the **Quote** popup appears, and the reply quotes only the selected part (composer preview on top).*
 
-- **Reply in channel** — answer a message right in the channel stream; the reply is posted as a separate channel message with a quote block on top (the thread sidebar does not open).
-- **Reply in thread** — answer from the thread sidebar (or via **Thread** in the post menu); the reply stays in the thread.
-- **Quote a fragment** — select part of a message and a small **Quote** popup appears above the selection (or press **Ctrl+Q**); the reply quotes only the selected text instead of the whole message.
+- **Reply from the channel** — click **Reply** on any message to open its thread and compose a quoted reply, including the first reply to a message. Messages already in a thread use that existing thread.
+- **Reply in thread** — answer from the thread sidebar, global Threads view, or via **Thread** in the post menu; the reply stays in the source thread.
+- **Quote a fragment** — select part of a message and a small **Quote** popup appears above the selection (or press **Ctrl+Q**); the reply quotes only the selected text instead of the whole message. Fragment quoting keeps its current channel or thread context.
 - **Clickable quotes** — clicking a quote block jumps to the original message (permalink scroll + highlight), including inside an already open thread.
 - **Quote preview** — a compact bar with the author, avatar and up to 5 quoted lines appears above the composer before you send; close it with × to cancel the reply.
 - **Localized UI** — Reply/Quote labels follow the user's Mattermost language (English / русский / français / Deutsch).
@@ -66,7 +62,7 @@ Prerequisites: Node.js (version from `webapp/.nvmrc`, currently 24).
 
 ```bash
 make check-style   # ESLint + TypeScript type check
-make test          # vitest unit tests (53 tests)
+make test          # vitest unit tests
 make coverage      # vitest with v8 coverage report
 make dist          # build the plugin bundle (dist/*.tar.gz)
 make deploy        # upload + enable the bundle on $MM_SERVICESETTINGS_SITEURL
