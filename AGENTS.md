@@ -111,6 +111,10 @@ token), then hard-refresh the web client.
   do not edit or commit it. `plugin.json.version` stays the
   release-declared version and must match the `v*` tag at release time.
 
+Channel-context pending replies are cancelled when the selected channel
+changes. Thread-context replies must not be cancelled based on the center
+channel id because the global Threads view can show another channel.
+
 ## Code conventions
 
 - `PluginRegistry` typings live in `webapp/src/types/mattermost-webapp/
@@ -123,6 +127,11 @@ token), then hard-refresh the web client.
   `docs/api.md`. Keep it that way — no new umbrella casts.
 - Magic numbers (timeouts, page sizes, popup geometry) are named constants
   in `webapp/src/constants.ts` with a one-line "why".
+
+New quoted posts record their exact Markdown prefix in `best_reply_fallback`.
+After editing, strip only that unchanged prefix. Legacy posts have no marker,
+so they retain the generated-author-header compatibility check; never treat
+an arbitrary leading user blockquote as a generated prefix.
 
 ## Credits
 
