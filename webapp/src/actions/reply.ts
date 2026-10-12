@@ -119,13 +119,32 @@ export async function startReplyToPost(
         selectedText: options.selectedText ? normalizeQuotedFragment(options.selectedText) : undefined,
     };
 
-    setPendingReply(store, pendingReply);
+    const isOpeningThread = context === 'thread' && !isThreadPanelAlreadyOpen(store, post, element);
+    const waitingReply = isOpeningThread ? {...pendingReply, isOpeningThread: true} : pendingReply;
+    setPendingReply(store, waitingReply);
 
     if (context === 'thread') {
-        if (!isThreadPanelAlreadyOpen(store, post, element)) {
-            const opened = await openThreadForPost(store, post.id);
-            focusComposer('thread', element);
-            return opened;
+        if (isOpeningThread) {
+            let opened;
+            try {
+                opened = await openThreadForPost(store, post.id, () => getPendingReply(store) === waitingReply);
+            } catch (error) {
+                if (getPendingReply(store) === waitingReply) {
+                    clearPendingReply(store);
+                }
+                throw error;
+            }
+
+            if (getPendingReply(store) !== waitingReply) {
+                return false;
+            }
+            if (!opened) {
+                clearPendingReply(store);
+                return false;
+            }
+
+            // The old composer may still exist while the target thread is loading.
+            setPendingReply(store, pendingReply);
         }
 
         focusComposer('thread', element);

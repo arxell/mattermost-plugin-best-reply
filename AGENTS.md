@@ -86,6 +86,13 @@ token), then hard-refresh the web client.
 8. **Every registered component is wrapped in ErrorBoundary** so a plugin
    render crash degrades to nothing instead of taking down the channel.
 
+9. **Removing a composer cancels its pending quote.** The preview observes
+   DOM removal while a quote is active; do not leave a detached portal with
+   an armed message hook after the initial mounting poll has stopped.
+   A quote waiting for a different thread must not mount in the old editor
+   or transform outgoing posts. Arm it only after that thread opens, and
+   ignore stale completions/removal callbacks for a replaced pending reply.
+
 ## User decisions that must not be violated
 
 - The plugin stays **webapp-only** (no server component).
