@@ -125,6 +125,11 @@ channel id because the global Threads view can show another channel.
 - Magic numbers (timeouts, page sizes, popup geometry) are named constants
   in `webapp/src/constants.ts` with a one-line "why".
 
+New quoted posts record their exact Markdown prefix in `best_reply_fallback`.
+After editing, strip only that unchanged prefix. Legacy posts have no marker,
+so they retain the generated-author-header compatibility check; never treat
+an arbitrary leading user blockquote as a generated prefix.
+
 ## Credits
 
 Base reply UX: Azario16/mattermost-plugin-channel-reply (MIT).
