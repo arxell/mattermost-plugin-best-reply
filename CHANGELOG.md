@@ -7,11 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-12
+
 ### Changed
 
 - The Reply button now opens the source message's thread and composes a
   quoted reply there, including when the message has no replies yet.
   Selection quoting and Ctrl+Q retain their channel/thread behavior.
+
+### Fixed
+
+- Restore quotes and original-message links when the quoted post is outside
+  the loaded history. Keep the stored Markdown readable if loading fails.
+- Cancel channel quotes when navigating away and thread quotes when their
+  composer closes, so later messages do not inherit an invisible quote.
+- Preserve newly selected quotes while switching threads. Cancelled,
+  superseded or failed thread requests no longer leave a quote armed.
+- Preserve user-written leading blockquotes when editing quoted replies;
+  older replies retain a conservative author-header compatibility check.
+- Prevent mentions copied into quotes from sending new notifications while
+  preserving intentional mentions in the reply body.
+- Include a readable Markdown quote for file-only original messages.
+- Publish the coverage badge even though its generated JSON is ignored on
+  the main branch.
 
 ## [1.2.4] - 2026-09-23
 
@@ -140,6 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clickable quotes navigating to the original post via permalinks.
 - Mobile markdown fallback embedded in the message body.
 
+[Unreleased]: https://github.com/arxell/mattermost-plugin-best-reply/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.3.0
 [1.2.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.2.0
 [1.1.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.1.0
 [1.0.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.0.0
