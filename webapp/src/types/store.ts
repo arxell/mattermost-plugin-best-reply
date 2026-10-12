@@ -6,6 +6,7 @@ export type PendingReply = {
     rootId: string;
     context: ReplyContext;
     selectedText?: string;
+    isOpeningThread?: boolean;
 };
 
 export type PluginState = {

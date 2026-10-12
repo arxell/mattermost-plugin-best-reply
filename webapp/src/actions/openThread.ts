@@ -43,7 +43,7 @@ function getRootPostId(post: Post): string {
     return post.root_id || post.id;
 }
 
-export async function openThreadForPost(store: Store, postId: string): Promise<boolean> {
+export async function openThreadForPost(store: Store, postId: string, isCurrentRequest?: () => boolean): Promise<boolean> {
     const dispatch = store.dispatch.bind(store);
 
     let post = getPostFromStore(store, postId);
@@ -64,6 +64,10 @@ export async function openThreadForPost(store: Store, postId: string): Promise<b
 
     const rootId = getRootPostId(post);
     const thread = await apiGet<PostList>(store, `/posts/${rootId}/thread?perPage=${THREAD_FETCH_PAGE_SIZE}`);
+
+    if (isCurrentRequest && !isCurrentRequest()) {
+        return false;
+    }
 
     dispatch({
         type: RECEIVED_POSTS,

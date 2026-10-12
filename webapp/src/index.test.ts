@@ -148,6 +148,17 @@ describe('plugin registration contract', () => {
         expect(store.dispatch).toHaveBeenCalledWith({type: expect.stringContaining('CLEAR_PENDING_REPLY')});
     });
 
+    it('does not consume an invisible quote while its thread is still opening', async () => {
+        const plugin = await importPlugin();
+        const registry = makeRegistry();
+        const store = makeStore({replyToPostId: 'quoted', channelId: 'ch1', rootId: 'root1', context: 'thread', isOpeningThread: true});
+        plugin.initialize(registry, store);
+        const [hook] = registry.registerMessageWillBePostedHook.mock.calls[0] as [(post: Post) => {post: Post}];
+        const post = {id: 'waiting', channel_id: 'ch1', root_id: 'root1', message: 'Plain reply'} as Post;
+        expect(hook(post).post).toBe(post);
+        expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
     it('thread-context pending reply only matches posts in the same thread', async () => {
         const plugin = await importPlugin();
         const registry = makeRegistry();
