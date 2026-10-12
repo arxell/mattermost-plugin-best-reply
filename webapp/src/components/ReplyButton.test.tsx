@@ -39,6 +39,7 @@ function makeStore(post: Post, selectedPostId = '') {
     const initialState = {
         [PLUGIN_STATE_KEY]: {pendingReply: null},
         entities: {
+            channels: {currentChannelId: post.channel_id},
             general: {config: {SiteURL: 'http://localhost', DefaultClientLocale: 'en'}},
             posts: {posts: {[post.id]: post}},
             users: {profiles: {}, currentUserId: 'me'},
