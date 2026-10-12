@@ -84,7 +84,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin coverage-badge || true
           git checkout -B coverage-badge
-          git add coverage-badge.json
+          git add -f coverage-badge.json
           git commit -m "Update coverage badge [skip ci]" || exit 0
           # The badge commit is not part of main's history, so the branch
           # is rewritten on every run.
