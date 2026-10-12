@@ -67,7 +67,7 @@ export default class Plugin {
         registry.registerMessageWillBePostedHook((post) => {
             const pendingReply = getPendingReply(store);
 
-            if (!pendingReply) {
+            if (!pendingReply || pendingReply.isOpeningThread) {
                 return {post};
             }
 

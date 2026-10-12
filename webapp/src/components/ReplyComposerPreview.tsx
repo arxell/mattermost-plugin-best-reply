@@ -6,7 +6,7 @@ import type {GlobalState} from '@mattermost/types/store';
 
 import ReplyQuote from './ReplyQuote';
 
-import {clearPendingReply} from '../actions/reply';
+import {clearPendingReply, getPendingReply} from '../actions/reply';
 import {PREVIEW_MOUNT_POLL_INTERVAL_MS, PREVIEW_MOUNT_POLL_TIMEOUT_MS} from '../constants';
 import {PLUGIN_STATE_KEY, type PendingReply} from '../types/store';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
@@ -46,7 +46,7 @@ const ReplyComposerPreview: React.FC = () => {
     }, [isOtherChannel, store]);
 
     useEffect(() => {
-        if (!pendingReply) {
+        if (!pendingReply || pendingReply.isOpeningThread) {
             setPortalHost(null);
             return undefined;
         }
@@ -74,7 +74,7 @@ const ReplyComposerPreview: React.FC = () => {
 
         // A detached portal must not leave an invisible quote armed for sending.
         const observer = new MutationObserver(() => {
-            if (hostElement && !hostElement.isConnected) {
+            if (hostElement && !hostElement.isConnected && getPendingReply(store) === pendingReply) {
                 clearPendingReply(store);
             }
         });
@@ -93,7 +93,7 @@ const ReplyComposerPreview: React.FC = () => {
         };
     }, [pendingReply, store]);
 
-    if (!pendingReply || !replyPost || !portalHost || isOtherChannel) {
+    if (!pendingReply || pendingReply.isOpeningThread || !replyPost || !portalHost || isOtherChannel) {
         return null;
     }
 
