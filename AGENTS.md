@@ -100,7 +100,8 @@ token), then hard-refresh the web client.
   the plugin's button is the one labeled "Reply" / "Ответить".
 - The plugin's Reply button always quotes inside the source thread
   (`post.root_id || post.id`), including the first reply from the channel.
-  Selection quoting and Ctrl+Q keep their current channel/thread context.
+  Selection quoting and Ctrl+Q also quote inside the source thread, preserving
+  only the selected fragment.
 - Fragments are capped at 500 characters; whole-message quotes are not
   capped.
 - Mobile clients must always see a readable markdown quote in the message

@@ -11,6 +11,7 @@ import type {GlobalState} from '@mattermost/types/store';
 
 import ReplyButton from './ReplyButton';
 import ReplyComposerPreview from './ReplyComposerPreview';
+import SelectionQuoteButton from './SelectionQuoteButton';
 
 import {getPendingReply} from '../actions/reply';
 import {COMPOSER_FOCUS_DELAY_MS, QUOTED_REPLY_POST_TYPE, THREAD_FETCH_PAGE_SIZE} from '../constants';
@@ -20,10 +21,11 @@ import {PLUGIN_STATE_KEY, type PluginState} from '../types/store';
 let plugin: InstanceType<typeof import('../index').default>;
 let root: Root;
 let container: HTMLDivElement;
+const SOURCE_ID = '4w9h6fbja78jueyh1hgcqg8z4y';
 
 function makePost(overrides: Partial<Post> = {}): Post {
     return {
-        id: 'source',
+        id: SOURCE_ID,
         channel_id: 'channel',
         user_id: 'author',
         root_id: '',
@@ -75,12 +77,12 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('Reply button thread routing', () => {
+describe.each(['Reply', 'Quote', 'Ctrl+Q'])('%s thread routing', (action) => {
     it.each([
         {name: 'channel root with no replies', surface: 'channel', rootId: '', replyCount: 0, selectedPostId: '', opensThread: true},
         {name: 'channel root with existing replies', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: 'other-root', opensThread: true},
         {name: 'thread reply shown in the channel', surface: 'channel', rootId: 'root', replyCount: 0, selectedPostId: '', opensThread: true},
-        {name: 'channel post with its thread already open', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: 'source', opensThread: false},
+        {name: 'channel post with its thread already open', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: SOURCE_ID, opensThread: false},
         {name: 'RHS thread reply', surface: 'sidebar--right', rootId: 'root', replyCount: 0, selectedPostId: 'root', opensThread: false},
         {name: 'global Threads reply', surface: 'ThreadViewer', rootId: 'root', replyCount: 0, selectedPostId: '', opensThread: false},
     ])('quotes a $name inside its source thread', async ({surface, rootId, replyCount, selectedPostId, opensThread}) => {
@@ -119,14 +121,39 @@ describe('Reply button thread routing', () => {
         await act(async () => {
             root.render(
                 <Provider store={store}>
+                    <div id={`post_${post.id}`}>
+                        <p data-testid='post-message-text'>{post.message}</p>
+                    </div>
                     <ReplyButton post={post}/>
                     <ReplyComposerPreview/>
+                    <SelectionQuoteButton/>
                 </Provider>,
             );
         });
-        await act(async () => {
-            container.querySelector<HTMLButtonElement>('.quoted-reply-post-action')!.click();
-        });
+        if (action === 'Reply') {
+            await act(async () => {
+                container.querySelector<HTMLButtonElement>('.quoted-reply-post-action')!.click();
+            });
+        } else {
+            const range = document.createRange();
+            const text = container.querySelector('p')!.firstChild!;
+            range.setStart(text, 0);
+            range.setEnd(text, 8);
+            range.getBoundingClientRect = () => new DOMRect(40, 100, 200, 18);
+            window.getSelection()!.removeAllRanges();
+            window.getSelection()!.addRange(range);
+            await act(async () => {
+                document.dispatchEvent(new Event('selectionchange'));
+            });
+            await act(async () => {
+                if (action === 'Quote') {
+                    document.querySelector<HTMLButtonElement>('.best-reply-selection-popup')!.click();
+                } else {
+                    document.dispatchEvent(new KeyboardEvent('keydown', {key: 'q', ctrlKey: true}));
+                }
+            });
+        }
+        const quote = action === 'Reply' ? post.message : 'Original';
 
         const pendingReply = getPendingReply(store);
         expect(pendingReply).toEqual({
@@ -134,7 +161,7 @@ describe('Reply button thread routing', () => {
             channelId: post.channel_id,
             rootId: expectedRootId,
             replyToPostId: post.id,
-            selectedText: undefined,
+            selectedText: action === 'Reply' ? undefined : quote,
         });
         if (opensThread) {
             expect(fetchMock).toHaveBeenCalledWith(`http://localhost/api/v4/posts/${expectedRootId}/thread?perPage=${THREAD_FETCH_PAGE_SIZE}`, expect.any(Object));
@@ -146,7 +173,7 @@ describe('Reply button thread routing', () => {
         expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({type: 'UPDATE_RHS_STATE'}));
 
         const composerSurface = surface === 'ThreadViewer' ? '.ThreadViewer' : '.sidebar--right';
-        expect(document.querySelector(`${composerSurface} .quoted-reply-quote__message`)?.textContent).toBe(post.message);
+        expect(document.querySelector(`${composerSurface} .quoted-reply-quote__message`)?.textContent).toBe(quote);
         act(() => vi.advanceTimersByTime(COMPOSER_FOCUS_DELAY_MS));
         expect(document.activeElement).toBe(document.querySelector(`${composerSurface} textarea`));
 
@@ -166,9 +193,12 @@ describe('Reply button thread routing', () => {
         expect(converted!).toMatchObject({
             root_id: expectedRootId,
             type: QUOTED_REPLY_POST_TYPE,
-            message: '> **Unknown user**\n> Original message\n\nMy reply',
+            message: `> **Unknown user**\n> ${quote}\n\nMy reply`,
             props: {best_reply_to: post.id, best_reply_body: 'My reply'},
         });
+        if (action !== 'Reply') {
+            expect(converted!.props.best_reply_text).toBe(quote);
+        }
         expect(getPendingReply(store)).toBeNull();
         expect(document.querySelector('.quoted-reply-composer-preview')).toBeNull();
     });
