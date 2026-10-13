@@ -24,6 +24,9 @@ export const PERMALINK_FADEOUT_MS = 5000;
 // any thread a user realistically quotes from.
 export const THREAD_FETCH_PAGE_SIZE = 200;
 
+// Matches the native search panel's first page and pagination parameters.
+export const SEARCH_PAGE_SIZE = 20;
+
 // Selection popup geometry: fixed width, small offset below the selection,
 // and a bottom margin so the popup never leaves the viewport.
 export const SELECTION_POPUP_WIDTH = 96;
