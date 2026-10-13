@@ -11,7 +11,8 @@ import type {GlobalState} from '@mattermost/types/store';
 
 import QuotedReplyPost from './QuotedReplyPost';
 
-const {loadPost, permalink} = vi.hoisted(() => ({loadPost: vi.fn(), permalink: vi.fn()}));
+const {loadPost, permalink, search} = vi.hoisted(() => ({loadPost: vi.fn(), permalink: vi.fn(), search: vi.fn()}));
+vi.mock('../actions/searchHashtag', () => ({searchHashtag: search}));
 vi.mock('../actions/navigateToPost', () => ({
     ensurePostLoaded: loadPost,
     getPermalinkUrl: permalink,
@@ -28,6 +29,8 @@ beforeEach(() => {
     loadPost.mockReset().mockResolvedValue(undefined);
     permalink.mockReset().mockImplementation((store) => (store.getState().entities.posts.posts.source ? '/audit/pl/source' : null));
     window.PostUtils = {formatText: (text) => text, messageHtmlToComponent: (html) => html};
+    search.mockReset().mockResolvedValue(undefined);
+    window.WebappUtils = {browserHistory: {push: vi.fn()}};
 });
 
 afterEach(async () => {
@@ -37,7 +40,7 @@ afterEach(async () => {
 
 describe('unloaded quote originals', () => {
     it('shows the stored fallback until the original is loaded, then restores the link', async () => {
-        const initial = {entities: {posts: {posts: {}}, users: {profiles: {author: {id: 'author', username: 'author'}}}}} as unknown as GlobalState;
+        const initial = {entities: {general: {config: {}}, posts: {posts: {}}, users: {profiles: {author: {id: 'author', username: 'author'}}}}} as unknown as GlobalState;
         const store = createStore((state: GlobalState = initial, action: {type: string; data?: Post}) => (action.data ? {
             ...state,
             entities: {...state.entities, posts: {...state.entities.posts, posts: {[action.data.id]: action.data}}},
@@ -52,7 +55,7 @@ describe('unloaded quote originals', () => {
 
     it('keeps readable content when fetching the original fails', async () => {
         loadPost.mockRejectedValue(new Error('offline'));
-        const state = {entities: {posts: {posts: {}}, users: {profiles: {}}}} as unknown as GlobalState;
+        const state = {entities: {general: {config: {}}, posts: {posts: {}}, users: {profiles: {}}}} as unknown as GlobalState;
         const store = createStore(() => state);
         await act(async () => root.render(<Provider store={store}><QuotedReplyPost post={reply}/></Provider>));
         expect(document.body.textContent).toContain('Original text');
@@ -68,6 +71,7 @@ describe('channel mentions in reply bodies', () => {
 
     function makeState() {
         return {entities: {
+            general: {config: {SiteURL: 'https://chat.test/mm'}},
             posts: {posts: {}},
             users: {profiles: {}},
             channels: {channels: {channel, target, foreign: {...target, id: 'foreign', team_id: otherTeam.id, display_name: 'Wrong team'}}},
@@ -128,7 +132,7 @@ describe('channel mentions in reply bodies', () => {
     });
 
     it('keeps only self-contained mentions when team context is unavailable', async () => {
-        const state = {entities: {posts: {posts: {}}, users: {profiles: {}}}} as unknown as GlobalState;
+        const state = {entities: {general: {config: {}}, posts: {posts: {}}, users: {profiles: {}}}} as unknown as GlobalState;
         const remote = {display_name: 'Канал', team_name: 'audit'};
         const {formatText} = await renderReply(state, {remote, legacy: 'No team', missingTeam: {display_name: 'No team'}});
         expect(formatText.mock.lastCall?.[1]).toMatchObject({channelNamesMap: {remote}});
@@ -140,5 +144,55 @@ describe('channel mentions in reply bodies', () => {
         const {formatText} = await renderReply(state);
         expect(formatText.mock.lastCall?.[1]?.team).toBeUndefined();
         expect(formatText.mock.lastCall?.[1]?.channelNamesMap).toEqual({});
+    });
+
+    it('passes SiteURL and follows the viewer notification setting for special mentions', async () => {
+        const state = makeState();
+        state.entities.users.currentUserId = 'viewer';
+        state.entities.users.profiles.viewer = {id: 'viewer', locale: 'en', notify_props: {channel: 'true'}} as never;
+        const {store, formatText} = await renderReply(state);
+        expect(formatText.mock.lastCall?.[1]).toMatchObject({siteURL: 'https://chat.test/mm', mentionKeys: [{key: '@channel'}, {key: '@all'}, {key: '@here'}]});
+        const updated = {...state, entities: {...state.entities, users: {...state.entities.users, profiles: {viewer: {...state.entities.users.profiles.viewer, notify_props: {...state.entities.users.profiles.viewer.notify_props, channel: 'false'}}}}}} as GlobalState;
+        await act(async () => store.dispatch({type: 'RECEIVED_ME', state: updated}));
+        expect(formatText.mock.lastCall?.[1]?.mentionKeys).toEqual([]);
+    });
+
+    it('handles nested internal links and preserves modified clicks and external links', async () => {
+        window.PostUtils.messageHtmlToComponent = () => (<>
+            <a
+                href='https://chat.test/mm/audit/pl/source'
+                data-link='/audit/pl/source'
+            ><strong>{'Internal'}</strong></a>
+            {/* eslint-disable-next-line @mattermost/use-external-link -- Reproduce native formatter output. */}
+            <a
+                href='https://example.com'
+                target='_blank'
+                rel='noreferrer'
+            >{'External'}</a>
+        </>);
+        await renderReply(makeState());
+        const click = (selector: string, init = {}) => document.querySelector(selector)!.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, ...init}));
+        expect(click('strong', {ctrlKey: true})).toBe(true);
+        expect(click('a[target]')).toBe(true);
+        expect(window.WebappUtils!.browserHistory.push).not.toHaveBeenCalled();
+        expect(click('strong')).toBe(false);
+        expect(window.WebappUtils!.browserHistory.push).toHaveBeenCalledWith('/audit/pl/source');
+    });
+
+    it('runs hashtag search and shows a readable error without hiding the reply', async () => {
+        window.PostUtils.messageHtmlToComponent = () => (
+            <a
+                href='#'
+                data-hashtag='#release'
+            >
+                <span>{'#release'}</span>
+            </a>
+        );
+        const {store} = await renderReply(makeState());
+        search.mockRejectedValue(new Error('offline'));
+        await act(async () => document.querySelector('a span')!.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true})));
+        expect(search).toHaveBeenCalledWith(store, '#release');
+        expect(document.querySelector('[role="alert"]')?.textContent).toBe('Could not search. Please try again.');
+        expect(document.querySelector('.quoted-reply-post__body')?.textContent).toBe('#release');
     });
 });

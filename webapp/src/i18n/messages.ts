@@ -11,6 +11,7 @@ export const messages = {
         reply_separate_action: 'Reply as a separate message',
         reply_in_thread_action: 'Reply in this thread',
         thread_action: 'Thread',
+        search_failed: 'Could not search. Please try again.',
     },
     ru: {
         quote_action: 'Цитировать',
@@ -19,6 +20,7 @@ export const messages = {
         reply_separate_action: 'Ответить отдельным сообщением',
         reply_in_thread_action: 'Ответить в этом треде',
         thread_action: 'Тред',
+        search_failed: 'Не удалось выполнить поиск. Попробуйте ещё раз.',
     },
     fr: {
         quote_action: 'Citer',
@@ -27,6 +29,7 @@ export const messages = {
         reply_separate_action: 'Répondre dans un message séparé',
         reply_in_thread_action: 'Répondre dans ce fil',
         thread_action: 'Fil',
+        search_failed: 'La recherche a échoué. Veuillez réessayer.',
     },
     de: {
         quote_action: 'Zitieren',
@@ -35,6 +38,7 @@ export const messages = {
         reply_separate_action: 'Als separate Nachricht antworten',
         reply_in_thread_action: 'In diesem Thread antworten',
         thread_action: 'Thread',
+        search_failed: 'Die Suche ist fehlgeschlagen. Bitte versuche es erneut.',
     },
 } as const;
 
