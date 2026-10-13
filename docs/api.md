@@ -97,6 +97,30 @@ Source contract: Mattermost [v9.0.0](https://github.com/mattermost/mattermost/bl
 and [v11.11.0](https://github.com/mattermost/mattermost/blob/v11.11.0/webapp/channels/src/utils/text_formatting.tsx),
 `autolinkChannelMentions`.
 
+### Reply-body interactions and permalink previews
+
+Reply bodies pass `SiteURL` to the host formatter and handle its `data-link`
+anchors through `WebappUtils.browserHistory`. Modified clicks retain native
+browser behavior. Special mention keys are enabled only when the current
+user's `notify_props.channel` is `true`; formatting still belongs to the host.
+
+The host's `searchForTerm` action is not exported to plugins. Hashtag clicks
+request the first page of posts/files, populate the native search entities and
+`RECEIVED_SEARCH_TERM.params`, then set `UPDATE_RHS_SEARCH_TERMS`,
+`UPDATE_RHS_SEARCH_RESULTS_TERMS`, the messages search type, and
+`UPDATE_RHS_STATE` to `search`. This preserves the host's pagination and result
+navigation. A failed/disabled file search must not discard message results.
+The stale-response guard reads **`views.rhs.rhsState`**, not `state`, and cancels
+publication after another search or navigation. Requests use the existing
+same-origin session and CSRF cookie and never update server messages.
+
+Mattermost 11.11 exports `window.Components.PostMessagePreview`; 9.0 does not.
+Use the native component for a normal permalink target and the existing
+`ReplyQuote` card on older hosts or custom targets. Do not recursively render a
+custom post's previews inside its own preview. Metadata comes from the server's
+first `permalink` embed; invalid identifiers or missing content leave the link
+readable without a card. A preview failure is isolated from the reply body.
+
 ## Composer DOM
 
 - Center channel composer: `#post-create .AdvancedTextEditor [contenteditable="true"]` / `#post_textbox`.

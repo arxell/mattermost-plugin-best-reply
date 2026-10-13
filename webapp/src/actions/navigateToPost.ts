@@ -218,7 +218,7 @@ async function navigateInThreadViewer(store: Store, post: Post, replyPost: Post)
     return true;
 }
 
-function getSiteUrl(store: Store): string {
+export function getSiteUrl(store: Store): string {
     const state: GlobalState = store.getState();
     return state.entities.general.config.SiteURL || window.location.origin;
 }
