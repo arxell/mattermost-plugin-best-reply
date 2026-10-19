@@ -4,7 +4,7 @@ import {useStore} from 'react-redux';
 import type {Post} from '@mattermost/types/posts';
 
 import {isReplyablePost} from '../actions/openThread';
-import {startReplyToPost} from '../actions/reply';
+import {startReplyToPost, isReplyInThreadView} from '../actions/reply';
 import {useTranslation} from '../i18n';
 
 type Props = {
@@ -38,8 +38,9 @@ const ReplyButton: React.FC<Props> = ({post}) => {
         event.preventDefault();
         event.stopPropagation();
 
+        const context = isReplyInThreadView(event.currentTarget as HTMLElement) ? 'thread' : 'channel';
         startReplyToPost(store, post, {
-            context: 'thread',
+            context,
             element: event.currentTarget as HTMLElement,
         });
     };

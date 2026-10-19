@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The Reply button replies where it is clicked again: in the channel stream
+  or a DM the quoted reply stays in that conversation, in a thread it stays
+  in that thread. A quoted reply in the thread from the channel stream is
+  still available through **Thread** in the post menu.
+
 ## [1.3.0] - 2026-10-12
 
 ### Changed

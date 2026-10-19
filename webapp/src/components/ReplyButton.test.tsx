@@ -77,10 +77,6 @@ afterEach(() => {
 
 describe('Reply button thread routing', () => {
     it.each([
-        {name: 'channel root with no replies', surface: 'channel', rootId: '', replyCount: 0, selectedPostId: '', opensThread: true},
-        {name: 'channel root with existing replies', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: 'other-root', opensThread: true},
-        {name: 'thread reply shown in the channel', surface: 'channel', rootId: 'root', replyCount: 0, selectedPostId: '', opensThread: true},
-        {name: 'channel post with its thread already open', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: 'source', opensThread: false},
         {name: 'RHS thread reply', surface: 'sidebar--right', rootId: 'root', replyCount: 0, selectedPostId: 'root', opensThread: false},
         {name: 'global Threads reply', surface: 'ThreadViewer', rootId: 'root', replyCount: 0, selectedPostId: '', opensThread: false},
     ])('quotes a $name inside its source thread', async ({surface, rootId, replyCount, selectedPostId, opensThread}) => {
@@ -171,5 +167,71 @@ describe('Reply button thread routing', () => {
         });
         expect(getPendingReply(store)).toBeNull();
         expect(document.querySelector('.quoted-reply-composer-preview')).toBeNull();
+    });
+});
+
+describe('Reply button channel routing', () => {
+    it.each([
+        {name: 'channel root with no replies', rootId: '', replyCount: 0, selectedPostId: ''},
+        {name: 'channel root with existing replies', rootId: '', replyCount: 2, selectedPostId: 'other-root'},
+        {name: 'thread reply shown in the channel', rootId: 'root', replyCount: 0, selectedPostId: ''},
+        {name: 'channel post with its thread already open', rootId: '', replyCount: 2, selectedPostId: 'source'},
+    ])('quotes a $name in the channel without opening a thread', async ({rootId, replyCount, selectedPostId}) => {
+        const post = makePost({root_id: rootId, reply_count: replyCount});
+        const store = makeStore(post, selectedPostId);
+        const dispatch = vi.spyOn(store, 'dispatch');
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+
+        const registry = {
+            registerReducer: vi.fn(),
+            registerTranslations: vi.fn(),
+            registerRootComponent: vi.fn(),
+            registerPostActionComponent: vi.fn(),
+            registerPostTypeComponent: vi.fn(),
+            registerPostDropdownMenuAction: vi.fn(),
+            registerMessageWillBePostedHook: vi.fn(),
+        };
+        plugin.initialize(registry, store);
+        const [hook] = registry.registerMessageWillBePostedHook.mock.calls[0] as [(outgoing: Post) => {post: Post}];
+
+        await act(async () => {
+            root.render(
+                <Provider store={store}>
+                    <ReplyButton post={post}/>
+                    <ReplyComposerPreview/>
+                </Provider>,
+            );
+        });
+        await act(async () => {
+            container.querySelector<HTMLButtonElement>('.quoted-reply-post-action')!.click();
+        });
+
+        expect(getPendingReply(store)).toEqual({
+            context: 'channel',
+            channelId: post.channel_id,
+            rootId: '',
+            replyToPostId: post.id,
+            selectedText: undefined,
+        });
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({type: 'SELECT_POST', postId: ''}));
+        expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({type: 'SELECT_POST', postId: post.root_id || post.id}));
+        expect(document.querySelector('#post-create .quoted-reply-quote__message')?.textContent).toBe(post.message);
+        expect(document.querySelector('.sidebar--right .quoted-reply-quote__message')).toBeNull();
+        act(() => vi.advanceTimersByTime(COMPOSER_FOCUS_DELAY_MS));
+        expect(document.activeElement).toBe(document.querySelector('#post_textbox'));
+
+        let converted: Post;
+        act(() => {
+            converted = hook(makePost({id: 'new-reply', root_id: '', message: 'My reply'})).post;
+        });
+        expect(converted!).toMatchObject({
+            root_id: '',
+            type: QUOTED_REPLY_POST_TYPE,
+            message: '> **Unknown user**\n> Original message\n\nMy reply',
+            props: {best_reply_to: post.id, best_reply_body: 'My reply'},
+        });
+        expect(getPendingReply(store)).toBeNull();
     });
 });
