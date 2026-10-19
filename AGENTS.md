@@ -97,13 +97,14 @@ token), then hard-refresh the web client.
 
 - The plugin stays **webapp-only** (no server component).
 - The native Mattermost Reply action stays renamed to "Thread" / "Тред";
-  the plugin's button is the one labeled "Reply" / "Ответить".
-- The plugin's Reply button quotes where it was clicked: in the channel
+  the plugin's button is the one labeled "Quote" / "Цитата" with a quotation
+  marks icon, so it never shares a name or an icon with the native reply.
+- The plugin's Quote button quotes where it was clicked: in the channel
   stream the reply stays a channel post (`root_id` empty), in the RHS thread
   or the global Threads view it goes to the source thread
-  (`post.root_id || post.id`). The **Thread** post menu action always quotes
-  inside the source thread. Selection quoting and Ctrl+Q keep their current
-  channel/thread context.
+  (`post.root_id || post.id`). The **Quote in thread** / "Ответить в треде с
+  цитатой" message action always quotes inside the source thread. Selection
+  quoting and Ctrl+Q keep their current channel/thread context.
 - Fragments are capped at 500 characters; whole-message quotes are not
   capped.
 - Mobile clients must always see a readable markdown quote in the message

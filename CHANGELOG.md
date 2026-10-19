@@ -9,10 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The Reply button replies where it is clicked again: in the channel stream
+- The plugin button is now **Quote** / «Цитата» with a quotation marks icon,
+  so it no longer looks like a second native Reply.
+- The Quote button replies where it is clicked again: in the channel stream
   or a DM the quoted reply stays in that conversation, in a thread it stays
-  in that thread. A quoted reply in the thread from the channel stream is
-  still available through **Thread** in the post menu.
+  in that thread. The native reply arrow keeps opening the thread.
+- The message action that quotes in the thread from the channel stream is
+  now labeled **Quote in thread** / «Ответить в треде с цитатой» and follows
+  the user's language instead of the hard-coded English "Thread".
 
 ## [1.3.0] - 2026-10-12
 

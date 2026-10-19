@@ -38,6 +38,7 @@ Consequences for selection quoting (`webapp/src/utils/selection.ts`):
 |---|---|
 | `registerPostActionComponent` / `registerPostTypeComponent` / `registerRootComponent` | A **component type**, never a JSX element. Passing an element throws React error #130 and unmounts the whole Mattermost app. Guarded by `index.test.ts` (component typeof 'function'). |
 | `registerMessageWillBePostedHook` | Synchronous transformation of the outgoing post. The returned object replaces the post before it is sent. Setting `type` to a custom value makes the server store the post under that type; the webapp renders it via `registerPostTypeComponent`. |
+| `registerPostDropdownMenuAction` | `text` is rendered as menu item content, so it may be a React element. Best Reply passes `<QuoteInThreadLabel/>` to follow the user's language. |
 | `registerTranslations` | Key-value map merged into the webapp i18n dictionaries. Best Reply uses it to rename the native Reply action to "Thread" / "Тред" (`post_info.reply`, `post_info.comment_icon.tooltip.reply`). |
 
 ## Internal Redux actions (dispatched by string type)
@@ -108,7 +109,7 @@ All timing values live in `webapp/src/constants.ts`:
 ## Core localization keys overridden
 
 `registerTranslations` merges these webapp i18n keys to rename the native
-Reply action (the plugin's own button is the one labeled "Reply"):
+Reply action (the plugin's own button is the one labeled "Quote"):
 
 - `post_info.reply` → "Thread" / "Тред" / "Fil" / "Thread"
 - `post_info.comment_icon.tooltip.reply` → same set of translations

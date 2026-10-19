@@ -25,12 +25,12 @@ Best Reply merges two plugins into one:
 
 *Select a fragment — the **Quote** popup appears, and the reply quotes only the selected part (composer preview on top).*
 
-- **Reply in channel** — click **Reply** on a message in the channel stream (or a DM) to answer right there; the reply is posted as a channel message with a quote block on top and no thread is opened.
-- **Reply in thread** — click **Reply** on a message in the thread sidebar or the global Threads view; the reply stays in the source thread. To start a quoted reply in a thread from the channel stream, use **Thread** in the post menu.
+- **Quote in channel** — click **Quote** (quotation marks icon) on a message in the channel stream or a DM to answer right there; the reply is posted as a channel message with a quote block on top and no thread is opened. The native reply arrow next to it keeps its default behavior and opens the thread.
+- **Quote in thread** — click **Quote** on a message in the thread sidebar or the global Threads view; the reply stays in the source thread. To start a quoted reply in a thread from the channel stream, use **Quote in thread** in the message actions menu.
 - **Quote a fragment** — select part of a message and a small **Quote** popup appears above the selection (or press **Ctrl+Q**); the reply quotes only the selected text instead of the whole message. Fragment quoting keeps its current channel or thread context.
 - **Clickable quotes** — clicking a quote block jumps to the original message (permalink scroll + highlight), including inside an already open thread.
 - **Quote preview** — a compact bar with the author, avatar and up to 5 quoted lines appears above the composer before you send; close it with × to cancel the reply.
-- **Localized UI** — Reply/Quote labels follow the user's Mattermost language (English / русский / français / Deutsch).
+- **Localized UI** — Quote labels follow the user's Mattermost language (English / русский / français / Deutsch).
 - **Mobile fallback** — on clients without the plugin the reply is readable as a plain markdown quote (`> **Author** > quoted text`), including the fragment for selection-based replies.
 
 Fragments are capped at 500 characters (truncated with an ellipsis). Whole-message quotes are not capped.
@@ -105,7 +105,10 @@ agreements and the list of Mattermost gotchas that cost us bugs are in
   the RHS thread panel via internal Redux actions.
 - The plugin renames the native "Reply" action to "Thread" by overriding the
   core i18n key `post_info.reply`. If another plugin overrides the same key,
-  the last registration wins and one of the labels will be wrong.
+  the last registration wins and one of the labels will be wrong. For
+  non-English locales Mattermost applies the server dictionary after plugin
+  translations when it loads a language, so the native action may keep its
+  original label; the plugin's **Quote** button stays distinct either way.
 - The pending reply is stored in memory: reloading the page or switching
   away before sending discards it.
 - Fragment quoting works on regular message bodies; selecting text inside an

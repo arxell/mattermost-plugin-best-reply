@@ -6,26 +6,30 @@
 export const messages = {
     en: {
         quote_action: 'Quote',
-        reply_action: 'Reply',
-        reply_action_title: 'Reply to message',
+        quote_reply_action: 'Quote',
+        quote_reply_action_title: 'Reply with a quote here',
+        quote_in_thread_action: 'Quote in thread',
         thread_action: 'Thread',
     },
     ru: {
         quote_action: 'Цитировать',
-        reply_action: 'Ответить',
-        reply_action_title: 'Ответить на сообщение',
+        quote_reply_action: 'Цитата',
+        quote_reply_action_title: 'Ответить с цитатой здесь',
+        quote_in_thread_action: 'Ответить в треде с цитатой',
         thread_action: 'Тред',
     },
     fr: {
         quote_action: 'Citer',
-        reply_action: 'Répondre',
-        reply_action_title: 'Répondre au message',
+        quote_reply_action: 'Citation',
+        quote_reply_action_title: 'Répondre avec une citation ici',
+        quote_in_thread_action: 'Citer dans le fil',
         thread_action: 'Fil',
     },
     de: {
         quote_action: 'Zitieren',
-        reply_action: 'Antworten',
-        reply_action_title: 'Auf Nachricht antworten',
+        quote_reply_action: 'Zitat',
+        quote_reply_action_title: 'Hier mit Zitat antworten',
+        quote_in_thread_action: 'Im Thread zitieren',
         thread_action: 'Thread',
     },
 } as const;

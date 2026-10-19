@@ -9,6 +9,7 @@ import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/re
 import ErrorBoundary from './components/ErrorBoundary';
 import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
+import QuoteInThreadLabel from './components/QuoteInThreadLabel';
 import ReplyButton from './components/ReplyButton';
 import ReplyComposerPreview from './components/ReplyComposerPreview';
 import SelectionQuoteButton from './components/SelectionQuoteButton';
@@ -50,8 +51,9 @@ export default class Plugin {
         registry.registerPostActionComponent(wrapWithErrorBoundary(ReplyButton));
         registry.registerPostTypeComponent(QUOTED_REPLY_POST_TYPE, wrapWithErrorBoundary(QuotedReplyPost));
 
+        // Menu item text is rendered as content, so an element is expected here.
         registry.registerPostDropdownMenuAction(
-            'Thread',
+            <QuoteInThreadLabel/>,
             (postId: string) => {
                 const post = getPostFromStore(store, postId);
                 if (post) {

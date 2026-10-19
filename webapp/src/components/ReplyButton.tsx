@@ -11,7 +11,8 @@ type Props = {
     post: Post;
 };
 
-const ReplyIcon = () => (
+// Quotation marks keep the button visually distinct from the native reply arrow next to it.
+const QuoteIcon = () => (
     <svg
         width='18'
         height='18'
@@ -20,7 +21,7 @@ const ReplyIcon = () => (
         aria-hidden='true'
     >
         <path
-            d='M10 8.5V6a1 1 0 0 1 1.707-.707l6 6a1 1 0 0 1 0 1.414l-6 6A1 1 0 0 1 10 18v-2.5H6a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h4Z'
+            d='M5 7h6v6l-2 4H6.5l2-4H5V7Zm8 0h6v6l-2 4h-2.5l2-4H13V7Z'
             fill='currentColor'
         />
     </svg>
@@ -49,12 +50,12 @@ const ReplyButton: React.FC<Props> = ({post}) => {
         <button
             type='button'
             className='quoted-reply-post-action'
-            aria-label={t('reply_action')}
-            title={t('reply_action_title')}
+            aria-label={t('quote_reply_action')}
+            title={t('quote_reply_action_title')}
             onClick={handleClick}
         >
-            <ReplyIcon/>
-            <span className='quoted-reply-post-action__label'>{t('reply_action')}</span>
+            <QuoteIcon/>
+            <span className='quoted-reply-post-action__label'>{t('quote_reply_action')}</span>
         </button>
     );
 };

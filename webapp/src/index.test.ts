@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import {isValidElement, type ReactElement} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import type {Post} from '@mattermost/types/posts';
@@ -90,6 +91,13 @@ describe('plugin registration contract', () => {
 
         const [postType] = registry.registerPostTypeComponent.mock.calls[0] as [string, unknown];
         expect(postType).toBe(QUOTED_REPLY_POST_TYPE);
+
+        // The menu item text is content, so it is a localized element.
+        // The label module is imported after the module reset to match the plugin instance.
+        const {default: QuoteInThreadLabel} = await import('./components/QuoteInThreadLabel');
+        const [menuText] = registry.registerPostDropdownMenuAction.mock.calls[0] as [unknown];
+        expect(isValidElement(menuText)).toBe(true);
+        expect((menuText as ReactElement).type).toBe(QuoteInThreadLabel);
     });
 
     it('messageWillBePosted hook leaves posts untouched without a pending reply', async () => {

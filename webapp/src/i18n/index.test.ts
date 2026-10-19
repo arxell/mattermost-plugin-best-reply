@@ -13,14 +13,22 @@ describe('translate', () => {
     });
 
     it('falls back to English for unknown locales', () => {
-        expect(translate('pt-BR', 'reply_action')).toBe('Reply');
+        expect(translate('pt-BR', 'quote_reply_action')).toBe('Quote');
+    });
+
+    it('labels the quote reply button and menu item distinctly from the native reply', () => {
+        expect(translate('ru', 'quote_reply_action')).toBe('Цитата');
+        expect(translate('ru', 'quote_reply_action_title')).toBe('Ответить с цитатой здесь');
+        expect(translate('ru', 'quote_in_thread_action')).toBe('Ответить в треде с цитатой');
+        expect(translate('en', 'quote_in_thread_action')).toBe('Quote in thread');
     });
 
     it('exposes every message id from the English table', () => {
         const ids = Object.keys(messages.en) as MessageId[];
         expect(ids).toContain('quote_action');
-        expect(ids).toContain('reply_action');
-        expect(ids).toContain('reply_action_title');
+        expect(ids).toContain('quote_reply_action');
+        expect(ids).toContain('quote_reply_action_title');
+        expect(ids).toContain('quote_in_thread_action');
         expect(ids).toContain('thread_action');
     });
 });

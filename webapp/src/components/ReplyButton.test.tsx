@@ -207,6 +207,10 @@ describe('Reply button channel routing', () => {
             container.querySelector<HTMLButtonElement>('.quoted-reply-post-action')!.click();
         });
 
+        const button = container.querySelector<HTMLButtonElement>('.quoted-reply-post-action')!;
+        expect(button.textContent).toBe('Quote');
+        expect(button.title).toBe('Reply with a quote here');
+
         expect(getPendingReply(store)).toEqual({
             context: 'channel',
             channelId: post.channel_id,
