@@ -1,7 +1,7 @@
 {
     "id": "com.bestreply.plugin",
     "name": "Best Reply",
-    "description": "Reply in the source thread with a quote block, or quote a selected fragment in the current channel or thread. Clickable quotes navigate to the original post.",
+    "description": "Quote a root message as a separate message or reply in its thread. Inside threads, replies stay in that thread. Select text to quote a fragment.",
     "homepage_url": "https://github.com/arxell/mattermost-plugin-best-reply",
     "support_url": "https://github.com/arxell/mattermost-plugin-best-reply/issues",
     "release_notes_url": "https://github.com/arxell/mattermost-plugin-best-reply/releases",
@@ -12,7 +12,7 @@
         "bundle_path": "webapp/dist/main.js"
     },
     "settings_schema": {
-        "header": "Replies open the source thread. Select part of a message to quote that fragment in the current channel or thread.",
+        "header": "Root messages offer separate-message and in-thread quotes. Inside threads, Reply quotes in that thread.",
         "footer": "",
         "settings": []
     }
