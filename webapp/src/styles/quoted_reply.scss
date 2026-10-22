@@ -1,3 +1,9 @@
+.quoted-reply-post-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
 .quoted-reply-post-action {
     display: inline-flex;
     align-items: center;
@@ -16,20 +22,24 @@
 
     &:hover,
     &:focus-visible {
-        background: rgba(18, 100, 163, 0.12);
-        border-color: rgba(18, 100, 163, 0.24);
-        color: #1264a3;
+        background: rgba(var(--link-color-rgb), 0.12);
+        border-color: rgba(var(--link-color-rgb), 0.24);
+        color: var(--link-color);
         outline: none;
     }
 
-    &__label {
-        display: none;
+    &--icon {
+        justify-content: center;
+        width: 32px;
+        padding: 0;
+        background: rgba(var(--link-color-rgb), 0.08);
+        border-color: rgba(var(--link-color-rgb), 0.24);
+        color: var(--link-color);
     }
 
-    @media (min-width: 1200px) {
-        &__label {
-            display: inline;
-        }
+    &:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
     }
 }
 

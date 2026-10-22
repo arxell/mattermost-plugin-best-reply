@@ -53,6 +53,21 @@ function makeStore(post: Post, selectedPostId = '') {
     }));
 }
 
+function initializePlugin(store: ReturnType<typeof makeStore>) {
+    const registry = {
+        registerReducer: vi.fn(),
+        registerTranslations: vi.fn(),
+        registerRootComponent: vi.fn(),
+        registerPostActionComponent: vi.fn(),
+        registerPostTypeComponent: vi.fn(),
+        registerPostDropdownMenuAction: vi.fn(),
+        registerMessageWillBePostedHook: vi.fn(),
+    };
+    plugin.initialize(registry, store);
+    const [hook] = registry.registerMessageWillBePostedHook.mock.calls[0] as [(outgoing: Post) => {post: Post}];
+    return hook;
+}
+
 beforeAll(async () => {
     window.registerPlugin = vi.fn();
     const {default: Plugin} = await import('../index');
@@ -81,6 +96,8 @@ describe('Reply button thread routing', () => {
         {name: 'channel root with existing replies', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: 'other-root', opensThread: true},
         {name: 'thread reply shown in the channel', surface: 'channel', rootId: 'root', replyCount: 0, selectedPostId: '', opensThread: true},
         {name: 'channel post with its thread already open', surface: 'channel', rootId: '', replyCount: 2, selectedPostId: 'source', opensThread: false},
+        {name: 'RHS thread root', surface: 'sidebar--right', rootId: '', replyCount: 0, selectedPostId: 'source', opensThread: false},
+        {name: 'global Threads root', surface: 'ThreadViewer', rootId: '', replyCount: 2, selectedPostId: '', opensThread: false},
         {name: 'RHS thread reply', surface: 'sidebar--right', rootId: 'root', replyCount: 0, selectedPostId: 'root', opensThread: false},
         {name: 'global Threads reply', surface: 'ThreadViewer', rootId: 'root', replyCount: 0, selectedPostId: '', opensThread: false},
     ])('quotes a $name inside its source thread', async ({surface, rootId, replyCount, selectedPostId, opensThread}) => {
@@ -94,17 +111,7 @@ describe('Reply button thread routing', () => {
         });
         vi.stubGlobal('fetch', fetchMock);
 
-        const registry = {
-            registerReducer: vi.fn(),
-            registerTranslations: vi.fn(),
-            registerRootComponent: vi.fn(),
-            registerPostActionComponent: vi.fn(),
-            registerPostTypeComponent: vi.fn(),
-            registerPostDropdownMenuAction: vi.fn(),
-            registerMessageWillBePostedHook: vi.fn(),
-        };
-        plugin.initialize(registry, store);
-        const [hook] = registry.registerMessageWillBePostedHook.mock.calls[0] as [(outgoing: Post) => {post: Post}];
+        const hook = initializePlugin(store);
 
         if (surface === 'ThreadViewer') {
             const viewer = document.createElement('div');
@@ -125,7 +132,17 @@ describe('Reply button thread routing', () => {
             );
         });
         await act(async () => {
-            container.querySelector<HTMLButtonElement>('.quoted-reply-post-action')!.click();
+            const buttons = container.querySelectorAll<HTMLButtonElement>('.quoted-reply-post-action');
+            const showBoth = surface === 'channel' && !rootId;
+            expect(buttons).toHaveLength(showBoth ? 2 : 1);
+            if (showBoth) {
+                expect(buttons[0].getAttribute('aria-label')).toBe('Reply as a separate message');
+                expect(buttons[1].getAttribute('aria-label')).toBe('Reply in this thread');
+                expect(container.querySelector('.quoted-reply-post-action__label')).toBeNull();
+            } else {
+                expect(buttons[0].textContent).toBe('Reply');
+            }
+            buttons[buttons.length - 1].click();
         });
 
         const pendingReply = getPendingReply(store);
@@ -171,5 +188,99 @@ describe('Reply button thread routing', () => {
         });
         expect(getPendingReply(store)).toBeNull();
         expect(document.querySelector('.quoted-reply-composer-preview')).toBeNull();
+    });
+});
+
+describe('separate replies from root posts in the channel', () => {
+    it.each([
+        {replyCount: 0, selectedPostId: ''},
+        {replyCount: 2, selectedPostId: ''},
+        {replyCount: 2, selectedPostId: 'source'},
+        {replyCount: 2, selectedPostId: 'other-root'},
+    ])('preserves drafts and closes the RHS ($selectedPostId)', async ({replyCount, selectedPostId}) => {
+        const post = makePost({reply_count: replyCount});
+        const store = makeStore(post, selectedPostId);
+        const dispatch = vi.spyOn(store, 'dispatch');
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+        const hook = initializePlugin(store);
+        const channelEditor = document.querySelector<HTMLTextAreaElement>('#post_textbox')!;
+        const threadEditor = document.querySelector<HTMLTextAreaElement>('.sidebar--right textarea')!;
+        channelEditor.value = 'Existing channel draft';
+        threadEditor.value = 'Existing thread draft';
+
+        await act(async () => root.render(
+            <Provider store={store}>
+                <ReplyButton post={post}/>
+                <ReplyComposerPreview/>
+            </Provider>,
+        ));
+        await act(async () => {
+            container.querySelector<HTMLButtonElement>('[aria-label="Reply as a separate message"]')!.click();
+        });
+        const pending = getPendingReply(store);
+        expect(pending).toMatchObject({context: 'channel', rootId: '', replyToPostId: post.id});
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({type: 'SELECT_POST', postId: ''}));
+        expect(dispatch).toHaveBeenCalledWith({type: 'UPDATE_RHS_STATE', state: null});
+        expect(document.querySelector('#post-create .quoted-reply-quote__message')?.textContent).toBe(post.message);
+        act(() => vi.advanceTimersByTime(COMPOSER_FOCUS_DELAY_MS));
+        expect(document.activeElement).toBe(channelEditor);
+        expect(channelEditor.value).toBe('Existing channel draft');
+        expect(threadEditor.value).toBe('Existing thread draft');
+
+        for (const outgoing of [
+            makePost({root_id: 'source', message: 'Thread draft'}),
+            makePost({channel_id: 'another-channel', message: 'Different channel'}),
+        ]) {
+            expect(hook(outgoing).post).toBe(outgoing);
+            expect(getPendingReply(store)).toBe(pending);
+        }
+        let converted: Post;
+        act(() => {
+            converted = hook(makePost({id: 'new-root', message: channelEditor.value})).post;
+        });
+        expect(converted!).toMatchObject({
+            root_id: '',
+            type: QUOTED_REPLY_POST_TYPE,
+            message: '> **Unknown user**\n> Original message\n\nExisting channel draft',
+            props: {best_reply_to: post.id},
+        });
+        expect(getPendingReply(store)).toBeNull();
+        expect(document.querySelector('.quoted-reply-composer-preview')).toBeNull();
+    });
+
+    it('keeps the separate reply when a previous thread request finishes', async () => {
+        const post = makePost();
+        const store = makeStore(post);
+        const dispatch = vi.spyOn(store, 'dispatch');
+        let resolveFetch!: (value: unknown) => void;
+        vi.stubGlobal('fetch', vi.fn(() => new Promise((resolve) => {
+            resolveFetch = resolve;
+        })));
+        initializePlugin(store);
+
+        await act(async () => root.render(
+            <Provider store={store}>
+                <ReplyButton post={post}/>
+                <ReplyComposerPreview/>
+            </Provider>,
+        ));
+        await act(async () => {
+            container.querySelector<HTMLButtonElement>('[aria-label="Reply in this thread"]')!.click();
+        });
+        expect(getPendingReply(store)?.isOpeningThread).toBe(true);
+        await act(async () => {
+            container.querySelector<HTMLButtonElement>('[aria-label="Reply as a separate message"]')!.click();
+        });
+        const pending = getPendingReply(store);
+        await act(async () => resolveFetch({
+            ok: true,
+            json: async () => ({order: [post.id], posts: {[post.id]: post}}),
+        }));
+        expect(getPendingReply(store)).toBe(pending);
+        expect(pending?.context).toBe('channel');
+        expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({type: 'SELECT_POST', postId: post.id}));
+        expect(document.querySelector('#post-create .quoted-reply-quote__message')?.textContent).toBe(post.message);
     });
 });

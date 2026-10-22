@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Root posts in the channel stream offer two icon-only quote actions: reply as
+  a separate message or reply in the source thread. Inside threads, keep one
+  text-labeled Reply action. Separate replies close the RHS and preserve drafts.
+
 ## [1.3.0] - 2026-10-12
 
 ### Changed

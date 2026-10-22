@@ -97,10 +97,15 @@ token), then hard-refresh the web client.
 
 - The plugin stays **webapp-only** (no server component).
 - The native Mattermost Reply action stays renamed to "Thread" / "Тред";
-  the plugin's button is the one labeled "Reply" / "Ответить".
-- The plugin's Reply button always quotes inside the source thread
-  (`post.root_id || post.id`), including the first reply from the channel.
-  Selection quoting and Ctrl+Q keep their current channel/thread context.
+  the plugin's single action inside threads stays labeled "Reply" / "Ответить".
+- Root posts in the channel stream have two icon-only quote actions: left
+  creates a separate channel message (empty `root_id`), closes the RHS and
+  focuses the channel composer; right replies in the source thread.
+- Inside the RHS/global Threads view, including its root post, keep one
+  text-labeled Reply button that quotes into that same thread. A non-root post
+  shown in the channel also keeps this single thread reply action.
+- Preserve existing drafts. Clicking an action prepares a quote; it never
+  sends a message. Selection quoting and Ctrl+Q keep their existing behavior.
 - Fragments are capped at 500 characters; whole-message quotes are not
   capped.
 - Mobile clients must always see a readable markdown quote in the message
