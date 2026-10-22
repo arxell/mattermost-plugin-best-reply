@@ -6,7 +6,7 @@
 [![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-blue)](https://github.com/arxell/mattermost-plugin-best-reply/releases/latest)
 [![coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Farxell%2Fmattermost-plugin-best-reply%2Fcoverage-badge%2Fcoverage-badge.json)](https://github.com/arxell/mattermost-plugin-best-reply/actions/workflows/ci.yml)
 
-**Reply to any message in its thread — with a visible quote block. Select a fragment to quote only that part.**
+**Quote a root message as a separate message or reply in its thread. Inside a thread, Reply keeps the quote in that thread.**
 
 </div>
 
@@ -21,8 +21,8 @@ Best Reply merges two plugins into one:
 
 *Select a fragment — the **Quote** popup appears, and the reply quotes only the selected part (composer preview on top).*
 
-- **Reply from the channel** — click **Reply** on any message to open its thread and compose a quoted reply, including the first reply to a message. Messages already in a thread use that existing thread.
-- **Reply in thread** — answer from the thread sidebar, global Threads view, or via **Thread** in the post menu; the reply stays in the source thread.
+- **Two actions on channel roots** — the left branching arrow prepares a separate channel message with a quote; the right return arrow prepares a quoted reply in the source thread. Both are icon-only with descriptive tooltips. The left action closes the RHS and focuses the channel composer without replacing its draft.
+- **Reply in thread** — the thread sidebar and global Threads view keep one **Reply** button with text, including on the root post. Replies shown in the channel also keep this single action. The quote stays in the source thread; **Thread** in the post menu remains available.
 - **Quote a fragment** — select part of a message and a small **Quote** popup appears above the selection (or press **Ctrl+Q**); the reply quotes only the selected text instead of the whole message. Fragment quoting keeps its current channel or thread context.
 - **Clickable quotes** — clicking a quote block jumps to the original message (permalink scroll + highlight), including inside an already open thread.
 - **Quote preview** — a compact bar with the author, avatar and up to 5 quoted lines appears above the composer before you send; close it with × to cancel the reply.
