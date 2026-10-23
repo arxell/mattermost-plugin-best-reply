@@ -7,16 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- Quoted reply bodies inherit Mattermost message typography instead of using a
-  larger font and wider list line spacing.
+## [1.4.0] - 2026-10-23
 
 ### Changed
 
-- Root posts in the channel stream offer two icon-only quote actions: reply as
-  a separate message or reply in the source thread. Inside threads, keep one
-  text-labeled Reply action. Separate replies close the RHS and preserve drafts.
+- Root messages have two quote actions: the left button starts a separate
+  message; the right button replies in the source thread. Inside threads,
+  the labeled Reply button keeps the answer in that thread. Both drafts survive
+  switching, for example when moving a release-plan reply into a separate topic.
+
+### Fixed
+
+- Channel mentions in reply bodies are clickable, including existing replies
+  and channels resolved from server metadata (for example, `~release-planning`).
+- Hashtags open native search, including when file search is disabled
+  (for example, click `#release` to find related messages).
+- Internal channel and message links navigate in the current tab; permalink
+  previews and special-mention highlighting such as `@here` are restored.
+- Reply text inherits normal message typography, including list line spacing.
 
 ## [1.3.0] - 2026-10-12
 
@@ -169,7 +177,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clickable quotes navigating to the original post via permalinks.
 - Mobile markdown fallback embedded in the message body.
 
-[Unreleased]: https://github.com/arxell/mattermost-plugin-best-reply/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/arxell/mattermost-plugin-best-reply/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/arxell/mattermost-plugin-best-reply/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.3.0
 [1.2.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.2.0
 [1.1.0]: https://github.com/arxell/mattermost-plugin-best-reply/releases/tag/v1.1.0
