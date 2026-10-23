@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Quoted reply bodies inherit Mattermost message typography instead of using a
+  larger font and wider list line spacing.
+
 ### Changed
 
 - Root posts in the channel stream offer two icon-only quote actions: reply as
